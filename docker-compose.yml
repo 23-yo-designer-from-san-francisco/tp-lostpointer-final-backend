@@ -31,20 +31,6 @@ services:
     volumes:
       - /autfinalVolumes/postgres-data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
-  
-  nginx:
-     image: nginx:mainline-alpine
-     ports:
-       - "80:80"
-     restart: unless-stopped
-     volumes:
-       - /home/artyom/autfinal/static/images:/home/ubuntu/static/images
-       - web-root:/var/www/html
-       - ./config/nginx:/etc/nginx/conf.d
-       - certbot-etc:/etc/letsencrypt
-       - certbot-var:/var/lib/letsencrypt
-     depends_on:
-       - "autfinal"
 
 volumes:
   web-root:
