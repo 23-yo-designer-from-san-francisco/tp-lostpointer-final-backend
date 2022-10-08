@@ -56,6 +56,7 @@ func main() {
 	baseRouter := gin.New()
 	baseRouter.Use(gin.Logger())
 	baseRouter.Use(gin.Recovery())
+	baseRouter.Use(mws.CORSMiddleware())
 	baseRouter.MaxMultipartMemory = 8 << 20
 
 	routerAPI := baseRouter.Group("/api")
