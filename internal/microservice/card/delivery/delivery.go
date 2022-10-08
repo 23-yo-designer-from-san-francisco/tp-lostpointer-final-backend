@@ -25,6 +25,7 @@ func(cD *CardDelivery) CreateCard(c *gin.Context) {
 	imgUrl, err := utils.SaveImageFromRequest(c,"image")
 	if err != nil {
 		c.Error(err)
+		return
 	}
 	if err == nil {
 		card.ImgUrl = imgUrl
@@ -33,6 +34,7 @@ func(cD *CardDelivery) CreateCard(c *gin.Context) {
 	resultCard, err := cD.cardUsecase.CreateCard(&card)
 	if err != nil {
 		c.Error(err)
+		return
 	}
 
 	c.JSON(http.StatusOK, &resultCard)
@@ -42,6 +44,7 @@ func (cD *CardDelivery) GetCards(c *gin.Context) {
 	resultCards, err := cD.cardUsecase.GetCards()
 	if err != nil {
 		c.Error(err)
+		return
 	}
 
 	c.JSON(http.StatusOK, &resultCards)
