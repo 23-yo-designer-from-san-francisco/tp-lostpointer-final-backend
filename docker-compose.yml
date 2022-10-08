@@ -31,8 +31,3 @@ services:
     volumes:
       - /autfinalVolumes/postgres-data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
-
-volumes:
-  web-root:
-  certbot-etc:
-  certbot-var:
