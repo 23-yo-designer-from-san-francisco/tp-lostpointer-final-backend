@@ -1,6 +1,6 @@
 server:
   port: "8080"
-  name: "localhost"
+  name: "https://lostpointer.tech"
 
 postgres:
   port: 5432
