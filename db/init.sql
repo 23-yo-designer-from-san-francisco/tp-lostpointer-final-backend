@@ -9,5 +9,3 @@ CREATE TABLE IF NOT EXISTS "card" (
     updatedAt timestamp, 
     deletedAt timestamp
 )
-
-DROP TABLE "card"
