@@ -9,6 +9,11 @@ type Card struct {
 	EndTime string `json:"endTime,omitempty" db:"endtime"`
 }
 
-type Schedule struct {
-	
+type Cards struct {
+	Cards []Card `json:"cards,omitempty"`
+}
+
+type Response struct {
+	Status int `json:"status"`
+	Response interface{} `json:"response"`
 }

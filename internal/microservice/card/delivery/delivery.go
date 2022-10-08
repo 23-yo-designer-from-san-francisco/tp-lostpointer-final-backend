@@ -37,7 +37,12 @@ func(cD *CardDelivery) CreateCard(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &resultCard)
+	response := &models.Response{
+		Status: http.StatusOK,
+		Response: resultCard,
+	}
+
+	c.JSON(http.StatusOK, &response)
 }
 
 func (cD *CardDelivery) GetCards(c *gin.Context) {
@@ -47,5 +52,12 @@ func (cD *CardDelivery) GetCards(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, &resultCards)
+	response := &models.Response{
+		Status: http.StatusOK,
+		Response: &models.Cards{
+			Cards: *resultCards,
+		},
+	}
+
+	c.JSON(http.StatusOK, &response)
 }
