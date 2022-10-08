@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS "card" (
     createdAt timestamp default now() not null,
     updatedAt timestamp, 
     deletedAt timestamp
-)
+);
