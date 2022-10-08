@@ -8,3 +8,7 @@ type Card struct {
 	StartTime string `json:"startTime,omitempty" db:"starttime"`
 	EndTime string `json:"endTime,omitempty" db:"endtime"`
 }
+
+type Schedule struct {
+	
+}
