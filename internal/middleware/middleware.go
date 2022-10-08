@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"autfinal/internal/models"
 	"github.com/goccy/go-json"
+	"log"
 )
 
 var allowedOrigins = []string{"", "http://45.141.102.243:8080", "http://127.0.0.1:8080", "localhost:5173"}
