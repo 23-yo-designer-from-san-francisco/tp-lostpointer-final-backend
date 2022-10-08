@@ -37,7 +37,6 @@ func (m *Middlewares) CORSMiddleware() gin.HandlerFunc {
 		for _, orig := range allowedOrigins {
 			if origin == orig {
 				isAllowed = true
-				return
 			}
 		}
 
