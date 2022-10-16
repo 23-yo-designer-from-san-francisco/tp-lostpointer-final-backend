@@ -29,12 +29,16 @@ func NewMentorRepository(db *sqlx.DB) *mentorRepository {
 }
 
 func(mR *mentorRepository) CreateMentor(mentor *models.Mentor) (*models.Mentor, error) {
+	message := logMessage + "CreateMentor:"
+	log.Debug(message + "started")
+
 	var resultMentor models.Mentor
 	err := mR.db.QueryRowx(createMentorQuery, &mentor.Name, &mentor.Surname, &mentor.Email, &mentor.Password).StructScan(&resultMentor)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
+	log.Debug("Result Mentor: ", resultMentor)
 	return &resultMentor, nil
 }
 
