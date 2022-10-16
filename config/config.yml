@@ -8,5 +8,8 @@ postgres:
   user: "a_shirshov"
   database: "autfinal"
 
+#img_path:
+#  "/autfinal/static/images"
+
 img_path:
-  "/autfinal/static/images"
+  "/home/artyom/static/images"
