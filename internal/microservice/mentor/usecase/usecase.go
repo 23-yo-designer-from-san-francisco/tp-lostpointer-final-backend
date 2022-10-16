@@ -4,8 +4,10 @@ import (
 	"autfinal/internal/microservice/mentor"
 	"autfinal/internal/models"
 	"errors"
-	"log"
+	log "autfinal/pkg/logger"
 )
+
+const logMessage = "microservice:mentor:delivery:"
 
 type mentorUsecase struct {
 	mentorRepository mentor.Repository
@@ -18,9 +20,12 @@ func NewMentorUsecase(mentorR mentor.Repository) *mentorUsecase {
 }
 
 func (mU *mentorUsecase) CreateMentor(mentor *models.Mentor) (*models.Mentor, error) {
+	message := logMessage + "CreateMentor:"
+	log.Debug(message + "started")
+
 	existingMentor, err := mU.mentorRepository.GetMentorByEmail(mentor.Email)
 	if existingMentor == nil {
-		log.Print(err)
+		log.Error(err)
 		return mU.mentorRepository.CreateMentor(mentor)
 	}
 	return nil, errors.New("user with this email exists")
