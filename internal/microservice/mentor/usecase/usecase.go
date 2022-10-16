@@ -7,7 +7,7 @@ import (
 	log "autfinal/pkg/logger"
 )
 
-const logMessage = "microservice:mentor:delivery:"
+const logMessage = "microservice:mentor:usecase:"
 
 type mentorUsecase struct {
 	mentorRepository mentor.Repository
