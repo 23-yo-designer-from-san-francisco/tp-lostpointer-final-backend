@@ -5,6 +5,9 @@ import (
 )
 
 type Repository interface {
-	CreateCard(card *models.Card) (*models.Card, error)
-	GetCards() (*[]models.Card, error)
+	CreateCardDay(*models.CardDay, string, int) (*models.CardDay, error)
+	GetCardsDay(int) (*[]models.CardDay, error)
+	GetCardDay(int, int) (*models.CardDay, error)
+	UpdateCardDay(*models.CardDay, int, int) (*models.CardDay, error)
+	UpdateCardsOrder(*models.CardsDay, int) (*models.CardsDay, error)
 }

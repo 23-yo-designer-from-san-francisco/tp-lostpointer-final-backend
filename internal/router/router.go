@@ -2,12 +2,36 @@ package router
 
 import (
 	cardD "autfinal/internal/microservice/card/delivery"
+	mentorD "autfinal/internal/microservice/mentor/delivery"
+	childD "autfinal/internal/microservice/child/delivery"
+	scheduleD "autfinal/internal/microservice/schedule/delivery"
 
 	"github.com/gin-gonic/gin"
-	"autfinal/internal/middleware"
 )
 
-func CardEndpoints(r *gin.RouterGroup, mws *middleware.Middlewares, cD *cardD.CardDelivery) {
-	r.POST("", mws.MiddlewareCardFormData(), cD.CreateCard)
-	r.GET("", cD.GetCards)
+func MentorEndpoints(r *gin.RouterGroup, mD *mentorD.MentorDelivery) {
+	r.POST("", mD.CreateMentor)
+	r.POST("/profile", mD.UpdateMentor)
+	r.GET("/profile/:mentor_id", mD.GetMentor)
+	r.GET("", mD.GetMentors)
+}
+
+func ChildEndpoints(r *gin.RouterGroup, cD *childD.ChildDelivery) {
+	r.POST("", cD.CreateChild)
+	r.GET("", cD.GetChilds)
+	r.GET("/:child_id", cD.GetChild)
+}
+
+func ScheduleEndpoints(r *gin.RouterGroup, schD *scheduleD.ScheduleDelivery) {
+	r.POST("", schD.CreateScheduleDay)
+	r.GET("", schD.GetSchedulesDay)
+	r.GET("/:schedule_id", schD.GetScheduleDay)
+}
+
+func CardDayEndpoints(r *gin.RouterGroup, cD *cardD.CardDelivery) {
+	r.POST("", cD.CreateCardDay)
+	r.GET("", cD.GetCardsDay)
+	r.GET("/:card_id", cD.GetCardDay)
+	r.POST("/:card_id/info", cD.UpdateCardDay)
+	r.POST("/order", cD.UpdateCardsOrder)
 }

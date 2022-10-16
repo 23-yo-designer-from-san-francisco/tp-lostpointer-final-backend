@@ -29,5 +29,8 @@ services:
         max-size: 10m
         max-file: "3"
     volumes:
-      - /autfinalVolumes/postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
+
+volumes:
+  postgres-data:
