@@ -33,4 +33,4 @@ services:
       - ./db/init.sql:/docker-entrypoint-initdb.d/create_tables.sql
 
 volumes:
-  postgres-data:
+  autfinal-postgres-data:
