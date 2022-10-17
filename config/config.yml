@@ -3,13 +3,13 @@ server:
   name: "https://lostpointer.tech"
 
 postgres:
-  port: 5433
-  host: "localhost"
+  port: 5432
+  host: "postgres"
   user: "a_shirshov"
   database: "autfinal"
 
-#img_path:
-#  "/autfinal/static/images"
-
 img_path:
-  "/home/artyom/static/images"
+  "/autfinal/static/images"
+
+#img_path:
+#  "/home/artyom/static/images"
