@@ -3,8 +3,8 @@ server:
   name: "https://lostpointer.tech"
 
 postgres:
-  port: 5432
-  host: "postgres"
+  port: 5433
+  host: "localhost"
   user: "a_shirshov"
   database: "autfinal"
 

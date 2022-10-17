@@ -40,6 +40,6 @@ func (mU *mentorUsecase) GetMentor(id int) (*models.Mentor, error) {
 	return mU.mentorRepository.GetMentor(id)
 }
 
-func (mU *mentorUsecase) GetMentors() ([]*models.Mentor, error) {
+func (mU *mentorUsecase) GetMentors() (*models.Mentors, error) {
 	return mU.mentorRepository.GetMentors()
 }

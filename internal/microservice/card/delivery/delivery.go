@@ -7,7 +7,6 @@ import (
 	log "autfinal/pkg/logger"
 	"net/http"
 	"strconv"
-
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
 )
@@ -36,16 +35,17 @@ func(cD *CardDelivery) CreateCardDay(c *gin.Context) {
 		json.Unmarshal([]byte(cardJsonStr), &card)
 	}
 
-	imgUrl, err := utils.SaveImageFromRequest(c,"image")
+	imgUUID, err := utils.SaveImageFromRequest(c,"image")
 	if err != nil {
 		log.Error(err)
 		return
 	}
+
 	if err == nil {
-		card.ImgUrl = imgUrl
+		card.ImgUUID = imgUUID
 	}
 
-	resultCard, err := cD.cardUsecase.CreateCardDay(card, imgUrl, scheduleID)
+	resultCard, err := cD.cardUsecase.CreateCardDay(card, imgUUID, scheduleID)
 	if err != nil {
 		c.Error(err)
 		return
@@ -75,9 +75,7 @@ func (cD *CardDelivery) GetCardsDay(c *gin.Context) {
 
 	response := &models.Response{
 		Status: http.StatusOK,
-		Response: &models.CardsDay{
-			Cards: *resultCards,
-		},
+		Response: resultCards,
 	}
 
 	c.JSON(http.StatusOK, &response)
@@ -100,7 +98,7 @@ func (cD *CardDelivery) GetCardDay(c *gin.Context) {
 
 	resultCard, err := cD.cardUsecase.GetCardDay(scheduleID, cardID)
 	if err != nil {
-		c.Error(err)
+		log.Error()
 		return
 	}
 
@@ -133,18 +131,18 @@ func (cD *CardDelivery) UpdateCardDay(c *gin.Context) {
 		json.Unmarshal([]byte(cardJsonStr), &card)
 	}
 
-	imgUrl, err := utils.SaveImageFromRequest(c,"image")
+	imgUUID, err := utils.SaveImageFromRequest(c,"image")
 	if err != nil {
-		c.Error(err)
+		log.Error(err)
 		return
 	}
 	if err == nil {
-		card.ImgUrl = imgUrl
+		card.ImgUUID = imgUUID
 	}
 
 	resultCard, err := cD.cardUsecase.UpdateCardDay(card, scheduleID, cardID)
 	if err != nil {
-		c.Error(err)
+		log.Error(err)
 		return
 	}
 

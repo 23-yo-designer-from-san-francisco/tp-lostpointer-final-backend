@@ -32,14 +32,12 @@ func (mD *MentorDelivery) CreateMentor(c *gin.Context) {
 		log.Error(message + "err = ", err)
 		return
 	}
-	log.Debug("Here_1")
 
 	resultMentor, err := mD.mentorUsecase.CreateMentor(requestMentor)
 	if err != nil {
 		c.JSON(http.StatusConflict, err.Error())
 		return
 	}
-	log.Debug("Here_2")
 
 	response := &models.Response{
 		Status: http.StatusOK,

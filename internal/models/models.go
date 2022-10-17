@@ -38,7 +38,8 @@ type CardDay struct {
 	Schedule_ID int `json:"schedule_id,omitempty" db:"schedule_id"`
 	Name *string `json:"name,omitempty" db:"name"`
 	Done *bool `json:"done,omitempty" db:"done"`
-	ImgUrl string `json:"imgUrl,omitempty" db:"imgurl"`
+	ImgUrl string `json:"imgUrl,omitempty" db:"-"`
+	ImgUUID string `json:"-" db:"imguuid"`
 	Order int `json:"orderPlace,omitempty" db:"orderplace"`
 	StartTime *string `json:"startTime,omitempty" db:"starttime"`
 	EndTime *string `json:"endTime,omitempty" db:"endtime"`
@@ -48,11 +49,16 @@ type CardLesson struct {
 	ID int `json:"id,omitempty" db:"id"`
 	Name string `json:"name,omitempty" db:"name"`
 	Done *bool `json:"done,omitempty" db:"done"`
-	ImgUrl string `json:"imgUrl,omitempty" db:"imgurl"`
+	ImgUrl string `json:"imgUrl,omitempty" db:"-"`
+	ImgUUID string `json:"-" db:"imguuid"`
 	Order int `json:"orderPlace,omitempty" db:"orderplace"`
 	Duration int `json:"duration" db:"duration"`
 }
 
+type Mentors struct {
+	Mentors []*Mentor `json:"mentors,omitempty"`
+}
+
 type CardsDay struct {
-	Cards []CardDay `json:"cards,omitempty"`
+	Cards []*CardDay `json:"cards,omitempty"`
 }

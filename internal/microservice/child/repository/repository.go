@@ -32,10 +32,8 @@ func(cR *childRepository) CreateChild(child *models.Child) (*models.Child, error
 	var resultChild models.Child
 	var row *sqlx.Row
 
-	row = cR.db.QueryRowx(createChildQuery, &child.Name, &child.Mentor_ID)
-	if child.DateOfBirth == nil {
-		row = cR.db.QueryRowx(createChildWithDOBQuery, &child.Name, child.DateOfBirth, &child.Mentor_ID)
-	} 
+	//row = cR.db.QueryRowx(createChildQuery, &child.Name, &child.Mentor_ID)
+	row = cR.db.QueryRowx(createChildWithDOBQuery, &child.Name, child.DateOfBirth, &child.Mentor_ID)
 	
 	err := row.StructScan(&resultChild)
 	if err != nil {

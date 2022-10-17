@@ -38,7 +38,7 @@ func(mR *mentorRepository) CreateMentor(mentor *models.Mentor) (*models.Mentor, 
 		log.Error(err)
 		return nil, err
 	}
-	log.Debug("Result Mentor: ", resultMentor)
+	
 	return &resultMentor, nil
 }
 
@@ -64,25 +64,19 @@ func (mR *mentorRepository) GetMentor(id int) (*models.Mentor, error) {
 	return &resultMentor, nil
 }
 
-func (mR *mentorRepository) GetMentors() ([]*models.Mentor, error) {
-	resultMentors := []*models.Mentor{}
-	rows, err := mR.db.Queryx(getMentorsQuery)
+func (mR *mentorRepository) GetMentors() (*models.Mentors, error) {
+	message := logMessage + "GetMentors:"
+	log.Debug(message + "started")
+
+	mentors := []*models.Mentor{}
+	err := mR.db.Select(&mentors, getMentorsQuery)
 	if err != nil {
-		log.Error(err)
+		log.Error(message + "err = ", err)
 		return nil, err
 	}
-	defer rows.Close()
-
-	for rows.Next() {
-		mentor := &models.Mentor{}
-		err := rows.StructScan(mentor)
-		if err != nil {
-			log.Error(err)
-			return nil, err
-		}
-		resultMentors = append(resultMentors, mentor)
+	resultMentors := &models.Mentors{
+		Mentors: mentors,
 	}
-	
 	return resultMentors, nil
 }
 
