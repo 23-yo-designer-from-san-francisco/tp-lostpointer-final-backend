@@ -84,3 +84,36 @@ func (cD *ChildDelivery) GetChilds(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK,response)
 }
+
+func (cD *ChildDelivery) UpdateChild(c *gin.Context) {
+	message := logMessage + "UpdateChild:"
+	log.Debug(message + "started")
+
+	idStr := c.Param("child_id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	requestChild := &models.Child{}
+	err = c.ShouldBindJSON(requestChild)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	requestChild.ID = id
+
+	resultChild, err := cD.childUsecase.UpdateChild(requestChild)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	response := &models.Response{
+		Status: http.StatusOK,
+		Response: resultChild,
+	}
+	c.JSON(http.StatusOK, response)
+}

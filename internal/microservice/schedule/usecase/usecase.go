@@ -26,3 +26,11 @@ func (schU *scheduleUsecase) GetSchedulesDay(childID int) ([]*models.ScheduleDay
 func (schU *scheduleUsecase) GetScheduleDay(childID, scheduleID int) (*models.ScheduleDay, error) {
 	return schU.scheduleRepository.GetScheduleDay(childID, scheduleID)
 }
+
+func (schU *scheduleUsecase) UpdateScheduleDay(schedule *models.ScheduleDay, childID, scheduleID int) (*models.ScheduleDay, error) {
+	return schU.scheduleRepository.UpdateScheduleDay(schedule, childID, scheduleID)
+}
+
+func (schU *scheduleUsecase) MakeFavouriteScheduleDay(schedule *models.ScheduleDay, childID int) (*models.ScheduleDay, error) {
+	return schU.scheduleRepository.MakeFavouriteScheduleDay(schedule, childID)
+}

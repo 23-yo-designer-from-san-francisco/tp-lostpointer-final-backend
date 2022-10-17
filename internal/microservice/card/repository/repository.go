@@ -63,7 +63,7 @@ func (cR *CardRepository) GetCardsDay(schedule_id int) (*models.CardsDay, error)
 	log.Debug(message + "started")
 
 	cards := []*models.CardDay{}
-	err := cR.db.Select(&cards,getCardsQuery, schedule_id)
+	err := cR.db.Select(&cards, getCardsQuery, schedule_id)
 	if err != nil {
 		log.Error(message + "err = ", err)
 		return nil, err

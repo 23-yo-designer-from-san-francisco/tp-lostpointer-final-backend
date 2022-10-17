@@ -40,6 +40,7 @@ create table if not exists "schedule_day" (
     child_id int references "child"(id) on delete cascade not null,
     name text not null,
     day date not null,
+    favourite boolean default false,
     createdAt timestamp default now() not null,
     updatedAt timestamp, 
     deletedAt timestamp
@@ -64,6 +65,7 @@ create table if not exists "schedule_lesson" (
     child_id int references "child"(id) on delete cascade not null,
     name text not null,
     duration int,
+    favourite boolean default false,
     createdAt timestamp default now() not null,
     updatedAt timestamp, 
     deletedAt timestamp
@@ -81,3 +83,5 @@ CREATE TABLE IF NOT EXISTS "card_lesson" (
     updatedAt timestamp, 
     deletedAt timestamp
 );
+
+alter table card_day add column favourite boolean default false;

@@ -16,6 +16,8 @@ const (
 		returning id, name, date_of_birth;`
 	getChildQuery = `select id, name, date_of_birth from "child" where id = $1 and mentor_id = $2`
 	getChildsQuery = `select id, name, date_of_birth from "child" where mentor_id = $1`
+	updateChildQuery = `update "child" set name = $1, date_of_birth = $2 where mentor_id = $3 and id = $4 
+		returning id, name, date_of_birth, mentor_id;`
 )
 
 type childRepository struct {
@@ -67,4 +69,19 @@ func(cR *childRepository) GetChilds(mentorID int) ([]*models.Child, error) {
 		return nil, err
 	}
 	return resultChilds, nil
+}
+
+func(cR *childRepository) UpdateChild(child *models.Child) (*models.Child, error) {
+	message := logMessage + "UpdateChild:"
+	log.Debug(message + "started")
+
+	resultChild := models.Child{}
+
+	err := cR.db.QueryRowx(updateChildQuery, child.Name, child.DateOfBirth, child.Mentor_ID, child.ID).StructScan(&resultChild)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return nil, err
+	}
+
+	return &resultChild, nil
 }

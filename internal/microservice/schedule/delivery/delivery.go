@@ -114,3 +114,82 @@ func (schD *ScheduleDelivery) GetScheduleDay(c *gin.Context) {
 	c.JSON(http.StatusOK,response)
 }
 
+func (schD *ScheduleDelivery) UpdateScheduleDay(c *gin.Context) {
+	message := logMessage + "UpdateScheduleDay:"
+	log.Debug(message + "started")
+
+	childIDStr := c.Param("child_id")
+	childID, err := strconv.Atoi(childIDStr)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	scheduleIDStr := c.Param("schedule_id")
+	scheduleID, err := strconv.Atoi(scheduleIDStr)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	requestSchedule := &models.ScheduleDay{}
+	err = c.ShouldBindJSON(requestSchedule)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	resultSchedule, err := schD.scheduleUsecase.UpdateScheduleDay(requestSchedule, childID, scheduleID)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	response := &models.Response{
+		Status: http.StatusOK,
+		Response: resultSchedule,
+	}
+
+	c.JSON(http.StatusOK,response)
+}
+
+func (schD *ScheduleDelivery) MakeFavouriteScheduleDay(c *gin.Context) {
+	message := logMessage + "MakeFavouriteScheduleDay:"
+	log.Debug(message + "started")
+
+	childIDStr := c.Param("child_id")
+	childID, err := strconv.Atoi(childIDStr)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	scheduleIDStr := c.Param("schedule_id")
+	scheduleID, err := strconv.Atoi(scheduleIDStr)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	requestSchedule := &models.ScheduleDay{}
+	err = c.ShouldBindJSON(requestSchedule)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	requestSchedule.ID = scheduleID
+
+	resultSchedule, err := schD.scheduleUsecase.MakeFavouriteScheduleDay(requestSchedule, childID)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	response := &models.Response{
+		Status: http.StatusOK,
+		Response: resultSchedule,
+	}
+
+	c.JSON(http.StatusOK,response)
+}

@@ -25,12 +25,14 @@ type ScheduleDay struct {
 	Child_ID int `json:"child_id,omitempty" db:"child_id"`
 	Name string `json:"name,omitempty" db:"name"`
 	Day string `json:"day,omitempty" db:"day"`
+	Favourite *bool `json:"favourite,omitempty" db:"favourite"`
 }
 
 type ScheduleLesson struct {
 	ID int `json:"id,omitempty" db:"id"`
 	Name string `json:"name,omitempty" db:"name"`
 	Duration int `json:"duration" db:"duration"`
+	Favourite *bool `json:"favourite,omitempty" db:"favourite"`
 }
 
 type CardDay struct {

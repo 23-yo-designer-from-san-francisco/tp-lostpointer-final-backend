@@ -42,3 +42,11 @@ func (cU *childUsecase) GetChilds() ([]*models.Child, error) {
 	mentorID := 1
 	return cU.childRepository.GetChilds(mentorID)
 }
+
+func (cU *childUsecase) UpdateChild(child *models.Child) (*models.Child, error) {
+	message := logMessage + "UpdateChild:"
+	log.Debug(message + "started")
+
+	child.Mentor_ID = 1;
+	return cU.childRepository.UpdateChild(child)
+}

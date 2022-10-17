@@ -20,12 +20,15 @@ func ChildEndpoints(r *gin.RouterGroup, cD *childD.ChildDelivery) {
 	r.POST("", cD.CreateChild)
 	r.GET("", cD.GetChilds)
 	r.GET("/:child_id", cD.GetChild)
+	r.POST("/:child_id", cD.UpdateChild)
 }
 
 func ScheduleEndpoints(r *gin.RouterGroup, schD *scheduleD.ScheduleDelivery) {
 	r.POST("", schD.CreateScheduleDay)
 	r.GET("", schD.GetSchedulesDay)
 	r.GET("/:schedule_id", schD.GetScheduleDay)
+	r.POST("/:schedule_id", schD.UpdateScheduleDay)
+	r.POST("/:schedule_id/favourite", schD.MakeFavouriteScheduleDay)
 }
 
 func CardDayEndpoints(r *gin.RouterGroup, cD *cardD.CardDelivery) {
