@@ -7,6 +7,6 @@ import (
 type Usecase interface {
 	CreateMentor(*models.Mentor) (*models.Mentor, error)
 	GetMentor(int) (*models.Mentor, error)
-	GetMentors() (*models.Mentors, error)
+	GetMentors() ([]*models.Mentor, error)
 	UpdateMentor(*models.Mentor) (*models.Mentor, error)
 }
