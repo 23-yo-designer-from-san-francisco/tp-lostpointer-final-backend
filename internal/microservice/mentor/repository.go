@@ -10,4 +10,5 @@ type Repository interface {
 	GetMentors() (*models.Mentors, error)
 	UpdateMentor(*models.Mentor) (*models.Mentor, error)
 	GetMentorByEmail(string) (*models.Mentor, error)
+	DeleteMentor(int) (error)
 }

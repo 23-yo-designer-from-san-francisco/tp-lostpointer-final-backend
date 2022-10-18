@@ -43,3 +43,7 @@ func (mU *mentorUsecase) GetMentor(id int) (*models.Mentor, error) {
 func (mU *mentorUsecase) GetMentors() (*models.Mentors, error) {
 	return mU.mentorRepository.GetMentors()
 }
+
+func (mU *mentorUsecase) DeleteMentor(id int) (*models.Mentor, error) {
+	return mU.mentorRepository.DeleteMentor(id)
+}

@@ -84,4 +84,5 @@ CREATE TABLE IF NOT EXISTS "card_lesson" (
     deletedAt timestamp
 );
 
-alter table card_day add column favourite boolean default false;
+--alter table schedule_day add column favourite boolean default false;
+--alter table schedule_lesson add column favourite boolean default false;

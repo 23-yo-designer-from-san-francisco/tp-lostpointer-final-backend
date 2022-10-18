@@ -9,4 +9,5 @@ type Usecase interface {
 	GetMentor(int) (*models.Mentor, error)
 	GetMentors() (*models.Mentors, error)
 	UpdateMentor(*models.Mentor) (*models.Mentor, error)
+	DeleteMentor(int) (error)
 }

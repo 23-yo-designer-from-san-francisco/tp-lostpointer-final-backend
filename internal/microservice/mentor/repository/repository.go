@@ -13,9 +13,10 @@ const (
 	createMentorQuery = `insert into "mentor" (name,surname,email,password) values ($1, $2, $3, $4) 
 		returning id, name, surname, email;`
 	updateMentorQuery = `update "mentor" set name = $1, surname = $2, email = $3 where id = $4;`
-	getMentorQuery = `select id, name, surname, email from "mentor" where id = $1`
-	getMentorsQuery = `select id, name, surname, email from "mentor"`
-	getMentorByEmailQuery = `select id, name, surname, email from "mentor" where email = $1`
+	getMentorQuery = `select id, name, surname, email from "mentor" where id = $1;`
+	getMentorsQuery = `select id, name, surname, email from "mentor";`
+	getMentorByEmailQuery = `select id, name, surname, email from "mentor" where email = $1;`
+	safeDeleteMentorQuery = `update "mentor" set deletedAt = now() where id = $1;`
 )
 
 type mentorRepository struct {
@@ -81,11 +82,26 @@ func (mR *mentorRepository) GetMentors() (*models.Mentors, error) {
 }
 
 func (mR *mentorRepository) GetMentorByEmail(email string) (*models.Mentor, error) {
+	message := logMessage + "GetMentorByEmail:"
+	log.Debug(message + "started")
+
 	var resultMentor models.Mentor
 	err := mR.db.Get(&resultMentor, getMentorByEmailQuery, email)
 	if err != nil {
-		log.Error(err)
+		log.Error(message + "err = ", err)
 		return nil, err
 	}
 	return &resultMentor, nil
+}
+
+func (mR *mentorRepository) DeleteMentor(id int) (error) {
+	message := logMessage + "DeleteMentor:"
+	log.Debug(message + "started")
+
+	_, err := mR.db.Exec(safeDeleteMentorQuery, id)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return err
+	}
+	return nil
 }

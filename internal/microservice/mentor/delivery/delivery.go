@@ -111,3 +111,20 @@ func (mD *MentorDelivery) GetMentors(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK,response)
 }
+
+func (mD* MentorDelivery) DeleteMentor(c *gin.Context) {
+	message := logMessage + "GetMentors:"
+	log.Debug(message + "started")
+
+	err := mD.mentorUsecase.DeleteMentor()
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	response := &models.Response{
+		Status: http.StatusOK,
+		Response: "OK",
+	}
+	c.JSON(http.StatusOK, response)
+}
