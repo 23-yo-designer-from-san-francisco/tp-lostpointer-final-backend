@@ -6,8 +6,8 @@ import (
 
 type Usecase interface {
 	CreateCardDay(*models.CardDay, string, int) (*models.CardDay, error)
-	GetCardsDay(int) (*models.CardsDay, error)
+	GetCardsDay(int) ([]*models.CardDay, error)
 	GetCardDay(int, int) (*models.CardDay, error)
 	UpdateCardDay(*models.CardDay, int, int) (*models.CardDay, error)
-	UpdateCardsOrder(*models.CardsDay, int) (*models.CardsDay, error)
+	UpdateCardsOrder([]*models.CardDay, int) ([]*models.CardDay, error)
 }

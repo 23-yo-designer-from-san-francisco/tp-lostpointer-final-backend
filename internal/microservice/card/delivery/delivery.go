@@ -5,10 +5,10 @@ import (
 	"autfinal/internal/models"
 	"autfinal/internal/utils"
 	log "autfinal/pkg/logger"
-	"net/http"
-	"strconv"
 	"github.com/gin-gonic/gin"
 	"github.com/goccy/go-json"
+	"net/http"
+	"strconv"
 )
 
 type CardDelivery struct {
@@ -21,9 +21,9 @@ func NewCardDelivery(cardU card.Usecase) *CardDelivery {
 	}
 }
 
-func(cD *CardDelivery) CreateCardDay(c *gin.Context) {
+func (cD *CardDelivery) CreateCardDay(c *gin.Context) {
 	scheduleIdStr := c.Param("schedule_id")
-	scheduleID, err := strconv.Atoi(scheduleIdStr) 
+	scheduleID, err := strconv.Atoi(scheduleIdStr)
 	if err != nil {
 		log.Error(err)
 		return
@@ -35,7 +35,7 @@ func(cD *CardDelivery) CreateCardDay(c *gin.Context) {
 		json.Unmarshal([]byte(cardJsonStr), &card)
 	}
 
-	imgUUID, err := utils.SaveImageFromRequest(c,"image")
+	imgUUID, err := utils.SaveImageFromRequest(c, "image")
 	if err != nil {
 		log.Error(err)
 		return
@@ -52,7 +52,7 @@ func(cD *CardDelivery) CreateCardDay(c *gin.Context) {
 	}
 
 	response := &models.Response{
-		Status: http.StatusOK,
+		Status:   http.StatusOK,
 		Response: resultCard,
 	}
 
@@ -61,7 +61,7 @@ func(cD *CardDelivery) CreateCardDay(c *gin.Context) {
 
 func (cD *CardDelivery) GetCardsDay(c *gin.Context) {
 	scheduleIdStr := c.Param("schedule_id")
-	scheduleID, err := strconv.Atoi(scheduleIdStr) 
+	scheduleID, err := strconv.Atoi(scheduleIdStr)
 	if err != nil {
 		log.Error(err)
 		return
@@ -74,7 +74,7 @@ func (cD *CardDelivery) GetCardsDay(c *gin.Context) {
 	}
 
 	response := &models.Response{
-		Status: http.StatusOK,
+		Status:   http.StatusOK,
 		Response: resultCards,
 	}
 
@@ -86,14 +86,14 @@ func (cD *CardDelivery) GetCardDay(c *gin.Context) {
 	cardID, err := strconv.Atoi(cardIdStr)
 	if err != nil {
 		log.Error()
-		return 
+		return
 	}
 
 	scheduleIdStr := c.Param("schedule_id")
 	scheduleID, err := strconv.Atoi(scheduleIdStr)
 	if err != nil {
 		log.Error()
-		return 
+		return
 	}
 
 	resultCard, err := cD.cardUsecase.GetCardDay(scheduleID, cardID)
@@ -103,7 +103,7 @@ func (cD *CardDelivery) GetCardDay(c *gin.Context) {
 	}
 
 	response := &models.Response{
-		Status: http.StatusOK,
+		Status:   http.StatusOK,
 		Response: resultCard,
 	}
 
@@ -115,14 +115,14 @@ func (cD *CardDelivery) UpdateCardDay(c *gin.Context) {
 	cardID, err := strconv.Atoi(cardIdStr)
 	if err != nil {
 		log.Error()
-		return 
+		return
 	}
 
 	scheduleIdStr := c.Param("schedule_id")
 	scheduleID, err := strconv.Atoi(scheduleIdStr)
 	if err != nil {
 		log.Error()
-		return 
+		return
 	}
 
 	cardJsonStr := c.Request.FormValue("card")
@@ -131,7 +131,7 @@ func (cD *CardDelivery) UpdateCardDay(c *gin.Context) {
 		json.Unmarshal([]byte(cardJsonStr), &card)
 	}
 
-	imgUUID, err := utils.SaveImageFromRequest(c,"image")
+	imgUUID, err := utils.SaveImageFromRequest(c, "image")
 	if err != nil {
 		log.Error(err)
 		return
@@ -147,7 +147,7 @@ func (cD *CardDelivery) UpdateCardDay(c *gin.Context) {
 	}
 
 	response := &models.Response{
-		Status: http.StatusOK,
+		Status:   http.StatusOK,
 		Response: resultCard,
 	}
 
@@ -159,10 +159,10 @@ func (cD *CardDelivery) UpdateCardsOrder(c *gin.Context) {
 	scheduleID, err := strconv.Atoi(scheduleIdStr)
 	if err != nil {
 		log.Error(err)
-		return 
+		return
 	}
 
-	var cards = &models.CardsDay{}
+	var cards []*models.CardDay
 	err = c.ShouldBindJSON(cards)
 	if err != nil {
 		log.Error(err)
@@ -176,7 +176,7 @@ func (cD *CardDelivery) UpdateCardsOrder(c *gin.Context) {
 	}
 
 	response := &models.Response{
-		Status: http.StatusOK,
+		Status:   http.StatusOK,
 		Response: resultCards,
 	}
 

@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func buildConnectionString(user,password, host, port, database string) string {
+func buildConnectionString(user, password, host, port, database string) string {
 	connectionString := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s", user, password, host, port, database)
 	return connectionString
 }
@@ -20,9 +20,9 @@ func InitPostgres() (*sqlx.DB, error) {
 	database := viper.GetString("POSTGRES_DB")
 	password := viper.GetString("POSTGRES_PASSWORD")
 	host := viper.GetString("postgres.host")
-	port := fmt.Sprintf("%d",viper.GetInt("postgres.port"))
+	port := fmt.Sprintf("%d", viper.GetInt("postgres.port"))
 
-	config, err := pgxpool.ParseConfig(buildConnectionString(user,password,host,port,database))
+	config, err := pgxpool.ParseConfig(buildConnectionString(user, password, host, port, database))
 	if err != nil {
 		log.Print(err)
 		return nil, err
@@ -31,7 +31,7 @@ func InitPostgres() (*sqlx.DB, error) {
 	nativeDB := stdlib.OpenDB(*config.ConnConfig)
 	nativeDB.SetMaxIdleConns(100)
 	nativeDB.SetMaxOpenConns(100)
-	
-	return sqlx.NewDb(nativeDB,"pgx"), nil
-	
+
+	return sqlx.NewDb(nativeDB, "pgx"), nil
+
 }

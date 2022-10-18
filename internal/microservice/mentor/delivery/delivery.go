@@ -116,7 +116,14 @@ func (mD* MentorDelivery) DeleteMentor(c *gin.Context) {
 	message := logMessage + "GetMentors:"
 	log.Debug(message + "started")
 
-	err := mD.mentorUsecase.DeleteMentor()
+	idStr := c.Param("mentor_id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	err = mD.mentorUsecase.DeleteMentor(id)
 	if err != nil {
 		log.Error(message + "err = ", err)
 		return

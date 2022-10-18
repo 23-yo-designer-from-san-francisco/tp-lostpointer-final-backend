@@ -1,3 +1,8 @@
+\c postgres
+DROP DATABASE IF EXISTS autfinal;
+CREATE DATABASE autfinal;
+\c autfinal
+
 create table if not exists "mentor" (
     id serial not null unique,
     name text not null,

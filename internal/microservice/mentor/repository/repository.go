@@ -29,7 +29,7 @@ func NewMentorRepository(db *sqlx.DB) *mentorRepository {
 	}
 }
 
-func(mR *mentorRepository) CreateMentor(mentor *models.Mentor) (*models.Mentor, error) {
+func (mR *mentorRepository) CreateMentor(mentor *models.Mentor) (*models.Mentor, error) {
 	message := logMessage + "CreateMentor:"
 	log.Debug(message + "started")
 
@@ -39,7 +39,7 @@ func(mR *mentorRepository) CreateMentor(mentor *models.Mentor) (*models.Mentor, 
 		log.Error(err)
 		return nil, err
 	}
-	
+
 	return &resultMentor, nil
 }
 
@@ -59,26 +59,23 @@ func (mR *mentorRepository) GetMentor(id int) (*models.Mentor, error) {
 	var resultMentor models.Mentor
 	err := mR.db.QueryRowx(getMentorQuery, id).StructScan(&resultMentor)
 	if err != nil {
-		log.Error(message + "err = ", err)
+		log.Error(message+"err = ", err)
 		return nil, err
 	}
 	return &resultMentor, nil
 }
 
-func (mR *mentorRepository) GetMentors() (*models.Mentors, error) {
+func (mR *mentorRepository) GetMentors() ([]*models.Mentor, error) {
 	message := logMessage + "GetMentors:"
 	log.Debug(message + "started")
 
 	mentors := []*models.Mentor{}
 	err := mR.db.Select(&mentors, getMentorsQuery)
 	if err != nil {
-		log.Error(message + "err = ", err)
+		log.Error(message+"err = ", err)
 		return nil, err
 	}
-	resultMentors := &models.Mentors{
-		Mentors: mentors,
-	}
-	return resultMentors, nil
+	return mentors, nil
 }
 
 func (mR *mentorRepository) GetMentorByEmail(email string) (*models.Mentor, error) {
@@ -105,3 +102,4 @@ func (mR *mentorRepository) DeleteMentor(id int) (error) {
 	}
 	return nil
 }
+

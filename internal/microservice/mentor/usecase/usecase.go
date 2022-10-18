@@ -3,8 +3,8 @@ package usecase
 import (
 	"autfinal/internal/microservice/mentor"
 	"autfinal/internal/models"
-	"errors"
 	log "autfinal/pkg/logger"
+	"errors"
 )
 
 const logMessage = "microservice:mentor:usecase:"
@@ -40,10 +40,11 @@ func (mU *mentorUsecase) GetMentor(id int) (*models.Mentor, error) {
 	return mU.mentorRepository.GetMentor(id)
 }
 
-func (mU *mentorUsecase) GetMentors() (*models.Mentors, error) {
+func (mU *mentorUsecase) GetMentors() ([]*models.Mentor, error) {
 	return mU.mentorRepository.GetMentors()
 }
 
-func (mU *mentorUsecase) DeleteMentor(id int) (*models.Mentor, error) {
+func (mU *mentorUsecase) DeleteMentor(id int) (error) {
+	//Check with cookie
 	return mU.mentorRepository.DeleteMentor(id)
 }
