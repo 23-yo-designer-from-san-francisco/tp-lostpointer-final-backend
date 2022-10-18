@@ -50,3 +50,10 @@ func (cU *childUsecase) UpdateChild(child *models.Child) (*models.Child, error) 
 	child.Mentor_ID = 1;
 	return cU.childRepository.UpdateChild(child)
 }
+
+func (cU *childUsecase) DeleteChild(id int) error {
+	message := logMessage + "DeleteChild:"
+	log.Debug(message + "started")
+
+	return cU.childRepository.DeleteChild(id)
+}

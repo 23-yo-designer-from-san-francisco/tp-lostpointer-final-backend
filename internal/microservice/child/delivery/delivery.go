@@ -117,3 +117,27 @@ func (cD *ChildDelivery) UpdateChild(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, response)
 }
+
+func (cD *ChildDelivery) DeleteChild(c *gin.Context) {
+	message := logMessage + "DeleteChild:"
+	log.Debug(message + "started")
+
+	idStr := c.Param("child_id")
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	err = cD.childUsecase.DeleteChild(id)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	response := &models.Response{
+		Status: http.StatusOK,
+		Response: "OK",
+	}
+	c.JSON(http.StatusOK, response)
+}

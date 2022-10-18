@@ -12,9 +12,9 @@ const logMessage = "microservice:mentor:repository:"
 const (
 	createMentorQuery = `insert into "mentor" (name,surname,email,password) values ($1, $2, $3, $4) 
 		returning id, name, surname, email;`
-	updateMentorQuery = `update "mentor" set name = $1, surname = $2, email = $3 where id = $4;`
-	getMentorQuery = `select id, name, surname, email from "mentor" where id = $1;`
-	getMentorsQuery = `select id, name, surname, email from "mentor";`
+	updateMentorQuery = `update "mentor" set name = $1, surname = $2, email = $3, updatedAt = now() where id = $4;`
+	getMentorQuery = `select id, name, surname, email from "mentor" where id = $1 and deletedAt is null;`
+	getMentorsQuery = `select id, name, surname, email from "mentor" where deletedAt is null;`
 	getMentorByEmailQuery = `select id, name, surname, email from "mentor" where email = $1;`
 	safeDeleteMentorQuery = `update "mentor" set deletedAt = now() where id = $1;`
 )

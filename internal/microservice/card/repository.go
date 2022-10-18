@@ -9,5 +9,13 @@ type Repository interface {
 	GetCardsDay(int) ([]*models.CardDay, error)
 	GetCardDay(int, int) (*models.CardDay, error)
 	UpdateCardDay(*models.CardDay, int, int) (*models.CardDay, error)
-	UpdateCardsOrder([]*models.CardDay, int) error
+	UpdateCardsDayOrder([]*models.CardDay, int) error
+	DeleteCardDay(int, int) (error)
+
+	CreateCardLesson(*models.CardLesson, string, int) (*models.CardLesson, error)
+	GetCardsLesson(int) ([]*models.CardLesson, error)
+	GetCardLesson(int, int) (*models.CardLesson, error)
+	UpdateCardLesson(*models.CardLesson, int, int) (*models.CardLesson, error)
+	UpdateCardsLessonOrder([]*models.CardLesson, int) error
+	DeleteCardLesson(int, int) (error)
 }

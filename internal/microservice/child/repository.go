@@ -9,4 +9,5 @@ type Repository interface {
 	GetChild(int, int) (*models.Child, error)
 	GetChilds(int) ([]*models.Child, error)
 	UpdateChild(*models.Child) (*models.Child, error)
+	DeleteChild(int) (error)
 }

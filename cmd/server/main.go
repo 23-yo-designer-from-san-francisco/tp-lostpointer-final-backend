@@ -95,11 +95,17 @@ func main() {
 	childRouter := routerAPI.Group("/childs")
 	router.ChildEndpoints(childRouter, childD)
 
-	scheduleRouter := childRouter.Group("/:child_id/schedules/day")
-	router.ScheduleEndpoints(scheduleRouter, scheduleD)
+	scheduleDayRouter := childRouter.Group("/:child_id/schedules/day")
+	router.ScheduleDayEndpoints(scheduleDayRouter, scheduleD)
+
+	scheduleLessonRouter := childRouter.Group("/:child_id/schedules/lesson")
+	router.ScheduleLessonEndpoints(scheduleLessonRouter, scheduleD)
 
 	cardDayRouter := routerAPI.Group("/schedules/day/:schedule_id/cards")
 	router.CardDayEndpoints(cardDayRouter, cardD)
+
+	cardLessonRouter := routerAPI.Group("/schedules/lesson/:schedule_id/cards")
+	router.CardLessonEndpoints(cardLessonRouter, cardD)
 
 	port := viper.GetString("server.port")
 

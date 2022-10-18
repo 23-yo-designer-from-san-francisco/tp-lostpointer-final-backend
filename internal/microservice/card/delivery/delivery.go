@@ -11,6 +11,8 @@ import (
 	"strconv"
 )
 
+const logMessage = "microservice:card:delivery:"
+
 type CardDelivery struct {
 	cardUsecase card.Usecase
 }
@@ -59,6 +61,47 @@ func (cD *CardDelivery) CreateCardDay(c *gin.Context) {
 	c.JSON(http.StatusOK, &response)
 }
 
+func (cD *CardDelivery) CreateCardLesson(c *gin.Context) {
+	message := logMessage + "CreateCardLesson:"
+	log.Debug(message + "started")
+
+	scheduleIdStr := c.Param("schedule_id")
+	scheduleID, err := strconv.Atoi(scheduleIdStr)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	cardJsonStr := c.Request.FormValue("card")
+	var card = &models.CardLesson{}
+	if cardJsonStr != "" {
+		json.Unmarshal([]byte(cardJsonStr), &card)
+	}
+
+	imgUUID, err := utils.SaveImageFromRequest(c, "image")
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	if err == nil {
+		card.ImgUUID = imgUUID
+	}
+
+	resultCard, err := cD.cardUsecase.CreateCardLesson(card, imgUUID, scheduleID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	response := &models.Response{
+		Status:   http.StatusOK,
+		Response: resultCard,
+	}
+
+	c.JSON(http.StatusOK, &response)
+}
+
 func (cD *CardDelivery) GetCardsDay(c *gin.Context) {
 	scheduleIdStr := c.Param("schedule_id")
 	scheduleID, err := strconv.Atoi(scheduleIdStr)
@@ -68,6 +111,28 @@ func (cD *CardDelivery) GetCardsDay(c *gin.Context) {
 	}
 
 	resultCards, err := cD.cardUsecase.GetCardsDay(scheduleID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	response := &models.Response{
+		Status:   http.StatusOK,
+		Response: resultCards,
+	}
+
+	c.JSON(http.StatusOK, &response)
+}
+
+func (cD *CardDelivery) GetCardsLesson(c *gin.Context) {
+	scheduleIdStr := c.Param("schedule_id")
+	scheduleID, err := strconv.Atoi(scheduleIdStr)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	resultCards, err := cD.cardUsecase.GetCardsLesson(scheduleID)
 	if err != nil {
 		c.Error(err)
 		return
@@ -97,6 +162,35 @@ func (cD *CardDelivery) GetCardDay(c *gin.Context) {
 	}
 
 	resultCard, err := cD.cardUsecase.GetCardDay(scheduleID, cardID)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	response := &models.Response{
+		Status:   http.StatusOK,
+		Response: resultCard,
+	}
+
+	c.JSON(http.StatusOK, &response)
+}
+
+func (cD *CardDelivery) GetCardLesson(c *gin.Context) {
+	cardIdStr := c.Param("card_id")
+	cardID, err := strconv.Atoi(cardIdStr)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	scheduleIdStr := c.Param("schedule_id")
+	scheduleID, err := strconv.Atoi(scheduleIdStr)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	resultCard, err := cD.cardUsecase.GetCardLesson(scheduleID, cardID)
 	if err != nil {
 		log.Error()
 		return
@@ -154,7 +248,51 @@ func (cD *CardDelivery) UpdateCardDay(c *gin.Context) {
 	c.JSON(http.StatusOK, &response)
 }
 
-func (cD *CardDelivery) UpdateCardsOrder(c *gin.Context) {
+func (cD *CardDelivery) UpdateCardLesson(c *gin.Context) {
+	cardIdStr := c.Param("card_id")
+	cardID, err := strconv.Atoi(cardIdStr)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	scheduleIdStr := c.Param("schedule_id")
+	scheduleID, err := strconv.Atoi(scheduleIdStr)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	cardJsonStr := c.Request.FormValue("card")
+	var card = &models.CardLesson{}
+	if cardJsonStr != "" {
+		json.Unmarshal([]byte(cardJsonStr), &card)
+	}
+
+	imgUUID, err := utils.SaveImageFromRequest(c, "image")
+	if err != nil {
+		log.Error(err)
+		return
+	}
+	if err == nil {
+		card.ImgUUID = imgUUID
+	}
+
+	resultCard, err := cD.cardUsecase.UpdateCardLesson(card, scheduleID, cardID)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	response := &models.Response{
+		Status:   http.StatusOK,
+		Response: resultCard,
+	}
+
+	c.JSON(http.StatusOK, &response)
+}
+
+func (cD *CardDelivery) UpdateCardsDayOrder(c *gin.Context) {
 	scheduleIdStr := c.Param("schedule_id")
 	scheduleID, err := strconv.Atoi(scheduleIdStr)
 	if err != nil {
@@ -169,7 +307,7 @@ func (cD *CardDelivery) UpdateCardsOrder(c *gin.Context) {
 		return
 	}
 
-	resultCards, err := cD.cardUsecase.UpdateCardsOrder(cards, scheduleID)
+	resultCards, err := cD.cardUsecase.UpdateCardsDayOrder(cards, scheduleID)
 	if err != nil {
 		c.Error(err)
 		return
@@ -178,6 +316,93 @@ func (cD *CardDelivery) UpdateCardsOrder(c *gin.Context) {
 	response := &models.Response{
 		Status:   http.StatusOK,
 		Response: resultCards,
+	}
+
+	c.JSON(http.StatusOK, &response)
+}
+
+func (cD *CardDelivery) UpdateCardsLessonOrder(c *gin.Context) {
+	scheduleIdStr := c.Param("schedule_id")
+	scheduleID, err := strconv.Atoi(scheduleIdStr)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	var cards []*models.CardLesson
+	err = c.ShouldBindJSON(cards)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	resultCards, err := cD.cardUsecase.UpdateCardsLessonOrder(cards, scheduleID)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	response := &models.Response{
+		Status:   http.StatusOK,
+		Response: resultCards,
+	}
+
+	c.JSON(http.StatusOK, &response)
+}
+
+func (cD *CardDelivery) DeleteCardDay(c *gin.Context) {
+	cardIdStr := c.Param("card_id")
+	cardID, err := strconv.Atoi(cardIdStr)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	scheduleIdStr := c.Param("schedule_id")
+	scheduleID, err := strconv.Atoi(scheduleIdStr)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	err = cD.cardUsecase.DeleteCardDay(scheduleID, cardID)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	response := &models.Response{
+		Status:   http.StatusOK,
+		Response: "OK",
+	}
+
+	c.JSON(http.StatusOK, &response)
+}
+
+func (cD *CardDelivery) DeleteCardLesson(c *gin.Context) {
+	cardIdStr := c.Param("card_id")
+	cardID, err := strconv.Atoi(cardIdStr)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	scheduleIdStr := c.Param("schedule_id")
+	scheduleID, err := strconv.Atoi(scheduleIdStr)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	err = cD.cardUsecase.DeleteCardLesson(scheduleID, cardID)
+	if err != nil {
+		log.Error()
+		return
+	}
+
+	response := &models.Response{
+		Status:   http.StatusOK,
+		Response: "OK",
 	}
 
 	c.JSON(http.StatusOK, &response)

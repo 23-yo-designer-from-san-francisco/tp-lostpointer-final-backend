@@ -9,4 +9,5 @@ type Usecase interface {
 	GetChild(int) (*models.Child, error)
 	GetChilds() ([]*models.Child, error)
 	UpdateChild(*models.Child) (*models.Child, error)
+	DeleteChild(int) (error)
 }

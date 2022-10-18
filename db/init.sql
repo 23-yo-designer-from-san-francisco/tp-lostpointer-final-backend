@@ -46,6 +46,7 @@ create table if not exists "schedule_day" (
     name text not null,
     day date not null,
     favourite boolean default false,
+    cards_count int default 0,
     createdAt timestamp default now() not null,
     updatedAt timestamp, 
     deletedAt timestamp
@@ -71,6 +72,7 @@ create table if not exists "schedule_lesson" (
     name text not null,
     duration int,
     favourite boolean default false,
+    cards_count int default 0,
     createdAt timestamp default now() not null,
     updatedAt timestamp, 
     deletedAt timestamp
@@ -91,3 +93,53 @@ CREATE TABLE IF NOT EXISTS "card_lesson" (
 
 --alter table schedule_day add column favourite boolean default false;
 --alter table schedule_lesson add column favourite boolean default false;
+--alter table schedule_lesson add cards_count int default 0;
+--alter table schedule_day add cards_count int default 0;
+
+create or replace function update_schedule_lesson_cards_count_up() returns trigger as $update_schedule_lesson_cards_count_up$
+begin
+    update schedule_lesson set cards_count = (cards_count + 1) where id = new.schedule_id;
+    return new;
+end;
+$update_schedule_lesson_cards_count_up$ language plpgsql;
+
+drop trigger if exists create_card_lesson ON card_lesson;
+create trigger create_card_lesson after insert on card_lesson for each row execute procedure update_schedule_lesson_cards_count_up();
+
+
+
+
+create or replace function update_schedule_lesson_cards_count_down() returns trigger as $update_schedule_lesson_cards_count_down$
+begin
+    update schedule_lesson set cards_count = (cards_count - 1) where id = new.schedule_id and new.deletedAt is not null;
+    return new;
+end;
+$update_schedule_lesson_cards_count_down$ language plpgsql;
+
+drop trigger if exists delete_card_lesson ON card_lesson;
+create trigger delete_card_lesson after update on card_lesson for each row execute procedure update_schedule_lesson_cards_count_down();
+
+
+
+create or replace function update_schedule_day_cards_count_up() returns trigger as $update_schedule_day_cards_count_up$
+begin
+    update schedule_day set cards_count = (cards_count + 1) where id = new.schedule_id;
+    return new;
+end;
+$update_schedule_day_cards_count_up$ language plpgsql;
+
+drop trigger if exists create_card_day ON card_lesson;
+create trigger create_card_day after insert on card_day for each row execute procedure update_schedule_day_cards_count_up();
+
+
+
+
+create or replace function update_schedule_day_cards_count_down() returns trigger as $update_schedule_day_cards_count_down$
+begin
+    update schedule_day set cards_count = (cards_count - 1) where id = new.schedule_id and new.deletedAt is not null;
+    return new;
+end;
+$update_schedule_day_cards_count_down$ language plpgsql;
+
+drop trigger if exists delete_card_day ON card_lesson;
+create trigger delete_card_day after update on card_day for each row execute procedure update_schedule_day_cards_count_down();
