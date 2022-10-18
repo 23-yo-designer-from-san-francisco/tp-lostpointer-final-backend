@@ -11,13 +11,13 @@ import (
 
 type CardUsecase struct {
 	scheduleRepo schedule.Repository
-	cardRepo card.Repository
+	cardRepo     card.Repository
 }
 
 func NewCardUsecase(scheduleR schedule.Repository, cardR card.Repository) *CardUsecase {
 	return &CardUsecase{
 		scheduleRepo: scheduleR,
-		cardRepo: cardR,
+		cardRepo:     cardR,
 	}
 }
 
@@ -40,7 +40,7 @@ func (cU *CardUsecase) CreateCardDay(card *models.CardDay, imgUUID string, sched
 	return resultCard, nil
 }
 
-func (cU *CardUsecase) GetCardsDay(schedule_id int) (*models.CardsDay, error) {
+func (cU *CardUsecase) GetCardsDay(schedule_id int) ([]*models.CardDay, error) {
 	_, err := cU.scheduleRepo.GetMentorIdFromScheduleID(schedule_id)
 	if err != nil {
 		log.Error(err)
@@ -55,7 +55,7 @@ func (cU *CardUsecase) GetCardsDay(schedule_id int) (*models.CardsDay, error) {
 		return nil, err
 	}
 
-	for _, resultCard := range resultCards.Cards{
+	for _, resultCard := range resultCards {
 		resultCard.ImgUrl = utils.MakeImageName(resultCard.ImgUUID)
 	}
 
@@ -100,7 +100,7 @@ func (cU *CardUsecase) UpdateCardDay(card *models.CardDay, schedule_id, card_id 
 	return resultCard, nil
 }
 
-func (cU *CardUsecase) UpdateCardsOrder(cards *models.CardsDay, schedule_id int) (*models.CardsDay, error) {
+func (cU *CardUsecase) UpdateCardsOrder(cards []*models.CardDay, schedule_id int) ([]*models.CardDay, error) {
 	_, err := cU.scheduleRepo.GetMentorIdFromScheduleID(schedule_id)
 	if err != nil {
 		log.Error(err)
@@ -120,7 +120,7 @@ func (cU *CardUsecase) UpdateCardsOrder(cards *models.CardsDay, schedule_id int)
 		return nil, err
 	}
 
-	for _, resultCard := range resultCards.Cards{
+	for _, resultCard := range resultCards {
 		resultCard.ImgUrl = utils.MakeImageName(resultCard.ImgUUID)
 	}
 
