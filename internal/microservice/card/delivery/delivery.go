@@ -271,7 +271,6 @@ func (cD *CardDelivery) UpdateCardLesson(c *gin.Context) {
 	imgUUID, err := utils.SaveImageFromRequest(c, "image")
 	if err != nil {
 		log.Error(err)
-		return
 	}
 	if err == nil {
 		card.ImgUUID = imgUUID
