@@ -224,11 +224,10 @@ func (cD *CardDelivery) UpdateCardDay(c *gin.Context) {
 	if cardJsonStr != "" {
 		json.Unmarshal([]byte(cardJsonStr), &card)
 	}
-
+	
 	imgUUID, err := utils.SaveImageFromRequest(c, "image")
 	if err != nil {
 		log.Error(err)
-		return
 	}
 	if err == nil {
 		card.ImgUUID = imgUUID

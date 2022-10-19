@@ -23,6 +23,8 @@ const (
 
 	updateCardDayQuery = `update "card_day" set name = $1, done = $2, imguuid = $3, startTime = $4, endTime = $5 where schedule_id = $6 and id = $7 
 		returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
+	updateCardDayWOImgQuery = `update "card_day" set name = $1, done = $2, startTime = $3, endTime = $4 where schedule_id = $5 and id = $6 
+		returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
 	updateCardDayOrder = `update "card_day" set orderPlace = $1 where schedule_id = $2 and id = $3 
 		returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
 	safeDeleteCardDay = `update "card_day" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
@@ -33,6 +35,8 @@ const (
 	getCardsLessonQuery = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and deletedAt is null order by orderPlace;`
 	getCardLessonQuery = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and id = $2;`
 	updateCardLessonQuery = `update "card_lesson" set name = $1, done = $2, imguuid = $3, duration = $4 where schedule_id = $5 and id = $6 
+		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
+	updateCardLessonWOImgQuery = `update "card_lesson" set name = $1, done = $2, duration = $3 where schedule_id = $4 and id = $5
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
 	updateCardLessonOrder = `update "card_lesson" set orderPlace = $1 where schedule_id = $2 and id = $3 
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
@@ -144,9 +148,14 @@ func (cR *CardRepository) GetCardLesson(scheduleID, cardID int) (*models.CardLes
 func (cR *CardRepository) UpdateCardDay(card *models.CardDay, scheduleID, cardID int) (*models.CardDay, error) {
 	message := logMessage + "UpdateCardDay:"
 	log.Debug(message + "started")
-
+	
+	var err error
 	resultCard := models.CardDay{}
-	err := cR.db.QueryRowx(updateCardDayQuery, &card.Name, &card.Done, &card.ImgUUID, &card.StartTime, &card.EndTime, &scheduleID, &cardID).StructScan(&resultCard)
+	if card.ImgUUID == "" {
+		err = cR.db.QueryRowx(updateCardDayWOImgQuery, &card.Name, &card.Done, &card.StartTime, &card.EndTime, &scheduleID, &cardID).StructScan(&resultCard)
+	} else {
+		err = cR.db.QueryRowx(updateCardDayQuery, &card.Name, &card.Done, &card.ImgUUID, &card.StartTime, &card.EndTime, &scheduleID, &cardID).StructScan(&resultCard)
+	}
 	if err != nil {
 		log.Error(message+"err = ", err)
 		return nil, err
@@ -158,8 +167,13 @@ func (cR *CardRepository) UpdateCardLesson(card *models.CardLesson, scheduleID, 
 	message := logMessage + "UpdateCardLesson:"
 	log.Debug(message + "started")
 
+	var err error
 	resultCard := models.CardLesson{}
-	err := cR.db.QueryRowx(updateCardLessonQuery, &card.Name, &card.Done, &card.ImgUUID, &card.Duration, &scheduleID, &cardID).StructScan(&resultCard)
+	if card.ImgUUID == "" {
+		err = cR.db.QueryRowx(updateCardLessonWOImgQuery, &card.Name, &card.Done, &card.Duration, &scheduleID, &cardID).StructScan(&resultCard)	
+	} else {
+		err = cR.db.QueryRowx(updateCardLessonQuery, &card.Name, &card.Done, &card.ImgUUID, &card.Duration, &scheduleID, &cardID).StructScan(&resultCard)
+	}
 	if err != nil {
 		log.Error(message+"err = ", err)
 		return nil, err
