@@ -17,6 +17,7 @@ const (
 	getMentorsQuery = `select id, name, surname, email from "mentor" where deletedAt is null;`
 	getMentorByEmailQuery = `select id, name, surname, email from "mentor" where email = $1;`
 	safeDeleteMentorQuery = `update "mentor" set deletedAt = now() where id = $1;`
+	getPersonalImagesQuery = `select id, mentor_id, imguuid from "personal_image" where mentor_id = $1;`
 )
 
 type mentorRepository struct {
@@ -103,3 +104,15 @@ func (mR *mentorRepository) DeleteMentor(id int) (error) {
 	return nil
 }
 
+func (mR* mentorRepository) GetPersonalImages(mentor_id int) ([]*models.PersonalImage, error) {
+	message := logMessage + "GetPersonalImages:"
+	log.Debug(message + "started")
+
+	personalImages := []*models.PersonalImage{}
+	err := mR.db.Select(&personalImages, getPersonalImagesQuery, mentor_id)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return nil, err
+	}
+	return personalImages, nil
+}

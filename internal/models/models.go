@@ -61,6 +61,13 @@ type CardLesson struct {
 	Duration *int `json:"duration" db:"duration"`
 }
 
+type PersonalImage struct {
+	ID int `json:"id,omitempty" db:"id"`
+	Mentor_ID int `json:"mentor_id,omitempty" db:"mentor_id"`
+	ImgUrl string `json:"imgUrl,omitempty" db:"-"`
+	ImgUUID string `json:"-" db:"imguuid"`
+}
+
 type Mentors struct {
 	Mentors []*Mentor `json:"mentors,omitempty"`
 }

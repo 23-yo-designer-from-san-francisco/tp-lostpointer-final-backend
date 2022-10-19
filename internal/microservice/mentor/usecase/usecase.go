@@ -3,6 +3,7 @@ package usecase
 import (
 	"autfinal/internal/microservice/mentor"
 	"autfinal/internal/models"
+	"autfinal/internal/utils"
 	log "autfinal/pkg/logger"
 	"errors"
 )
@@ -47,4 +48,16 @@ func (mU *mentorUsecase) GetMentors() ([]*models.Mentor, error) {
 func (mU *mentorUsecase) DeleteMentor(id int) (error) {
 	//Check with cookie
 	return mU.mentorRepository.DeleteMentor(id)
+}
+
+func (mU *mentorUsecase) GetPersonalImages(mentor_id int) ([]*models.PersonalImage, error) {
+	personalImages, err := mU.mentorRepository.GetPersonalImages(mentor_id)
+	if err != nil {
+		log.Error(err)
+		return nil, err
+	}
+	for _, image := range personalImages {
+		image.ImgUrl = utils.MakeImageName(image.ImgUUID)
+	}
+	return personalImages, nil
 }

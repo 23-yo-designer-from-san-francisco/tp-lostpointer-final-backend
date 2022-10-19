@@ -9,7 +9,7 @@ import (
 const logMessage = "microservice:card:repository:"
 
 const (
-	createCardDayQuery = `insert into "card_day" (name, imguuid, startTime, endTime, orderPlace, schedule_id) values ($1, $2, $3, $4, (select COUNT(id) + 1 from "card_day" where schedule_id = $5), $5) 
+	createCardDayQuery = `insert into "card_day" (name, imguuid, startTime, endTime, orderPlace, schedule_id) values ($1, $2, $3, $4, (select cards_count from "schedule_day" where "id" = $5) + 1, $5) 
 		returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
 	// createCardWOEndTimeQuery = `insert into "card_day" (name, imguuid, startTime, orderPlace, schedule_id) values ($1, $2, $3, (select COUNT(id) + 1 from "card_day" where schedule_id = $4), $4) 
 	// 	returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
@@ -42,6 +42,8 @@ const (
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
 	safeDeleteCardLesson = `update "card_lesson" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
 	changeOrderCardsLessonAfterDelete = `update "card_lesson" set orderPlace = (orderPlace - 1) where orderPlace > $1;`
+
+	savePersonalImageQuery = `insert into "personal_image" (imguuid, mentor_id) values ($1, $2);`
 )
 
 type CardRepository struct {
@@ -54,40 +56,58 @@ func NewCardRepository(db *sqlx.DB) *CardRepository {
 	}
 }
 
-func (cR *CardRepository) CreateCardDay(CardDay *models.CardDay, imguuid string, schedule_id int) (*models.CardDay, error) {
+func (cR *CardRepository) CreateCardDay(CardDay *models.CardDay, mentor_id int) (*models.CardDay, error) {
 	message := logMessage + "CreateCardDay:"
 	log.Debug(message + "started")
 
 	var resultCard models.CardDay
-	row := cR.db.QueryRowx(createCardDayQuery, &CardDay.Name, &imguuid, &CardDay.StartTime, &CardDay.EndTime, &schedule_id)
-	// if CardDay.EndTime == nil {
-	// 	row = cR.db.QueryRowx(createCardWOEndTimeQuery, &CardDay.Name, &imguuid, &CardDay.StartTime, &schedule_id)
-	// }
-	// if CardDay.StartTime == nil {
-	// 	row = cR.db.QueryRowx(createCardWOStartTimeQuery, &CardDay.Name, &imguuid, &schedule_id)
-	// }
-	// if CardDay.Name == nil {
-	// 	row = cR.db.QueryRowx(createCardOnlyImgQuery, &imguuid, &schedule_id)
-	// }
-
-	err := row.StructScan(&resultCard)
+	tx, err :=  cR.db.Beginx()
 	if err != nil {
+		log.Error(message+"err = ", err)
 		return nil, err
 	}
+	err = tx.QueryRowx(createCardDayQuery, &CardDay.Name, &CardDay.ImgUUID, &CardDay.StartTime, &CardDay.EndTime, &CardDay.Schedule_ID).StructScan(&resultCard)
+	if err != nil {
+		log.Error(message+"err = ", err)
+		tx.Rollback()
+		return nil, err
+	}
+
+	_, err = tx.Exec(savePersonalImageQuery, &CardDay.ImgUUID, &mentor_id)
+	if err != nil {
+		log.Error(message+"err = ", err)
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
 	return &resultCard, nil
 }
 
-func (cR *CardRepository) CreateCardLesson(CardDay *models.CardLesson, imguuid string, schedule_id int) (*models.CardLesson, error) {
-	message := logMessage + "CreateCardDay:"
+func (cR *CardRepository) CreateCardLesson(CardLesson *models.CardLesson, mentor_id int) (*models.CardLesson, error) {
+	message := logMessage + "CreateCardLesson:"
 	log.Debug(message + "started")
 
 	var resultCard models.CardLesson
-	row := cR.db.QueryRowx(createCardLessonQuery, &CardDay.Name, &imguuid, &CardDay.Duration, &schedule_id)
-
-	err := row.StructScan(&resultCard)
+	tx, err := cR.db.Beginx()
 	if err != nil {
+		log.Error(message+"err = ", err)
 		return nil, err
 	}
+
+	err = tx.QueryRowx(createCardLessonQuery, &CardLesson.Name, &CardLesson.ImgUUID, &CardLesson.Duration, &CardLesson.Schedule_ID).StructScan(&resultCard)
+	if err != nil {
+		log.Error(message+"err = ", err)
+		tx.Rollback()
+		return nil, err
+	}
+
+	_, err = tx.Exec(savePersonalImageQuery, &CardLesson.ImgUUID, &mentor_id)
+	if err != nil {
+		log.Error(message+"err = ", err)
+		tx.Rollback()
+		return nil, err
+	}
+	tx.Commit()
 	return &resultCard, nil
 }
 

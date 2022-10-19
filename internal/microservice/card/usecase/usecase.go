@@ -21,16 +21,16 @@ func NewCardUsecase(scheduleR schedule.Repository, cardR card.Repository) *CardU
 	}
 }
 
-func (cU *CardUsecase) CreateCardDay(card *models.CardDay, imgUUID string, schedule_id int) (*models.CardDay, error) {
-	_, err := cU.scheduleRepo.GetMentorIdFromScheduleDayID(schedule_id)
+func (cU *CardUsecase) CreateCardDay(card *models.CardDay, schedule_id int) (*models.CardDay, error) {
+	mentor_id, err := cU.scheduleRepo.GetMentorIdFromScheduleDayID(schedule_id)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
 
 	//check mentor_id with cookie
-
-	resultCard, err := cU.cardRepo.CreateCardDay(card, imgUUID, schedule_id)
+	card.Schedule_ID = schedule_id
+	resultCard, err := cU.cardRepo.CreateCardDay(card, mentor_id)
 	if err != nil {
 		log.Error(err)
 		return nil, err
@@ -40,16 +40,16 @@ func (cU *CardUsecase) CreateCardDay(card *models.CardDay, imgUUID string, sched
 	return resultCard, nil
 }
 
-func (cU *CardUsecase) CreateCardLesson(card *models.CardLesson, imgUUID string, schedule_id int) (*models.CardLesson, error) {
-	_, err := cU.scheduleRepo.GetMentorIdFromScheduleLessonID(schedule_id)
+func (cU *CardUsecase) CreateCardLesson(card *models.CardLesson, schedule_id int) (*models.CardLesson, error) {
+	mentor_id, err := cU.scheduleRepo.GetMentorIdFromScheduleLessonID(schedule_id)
 	if err != nil {
 		log.Error(err)
 		return nil, err
 	}
 
 	//check mentor_id with cookie
-
-	resultCard, err := cU.cardRepo.CreateCardLesson(card, imgUUID, schedule_id)
+	card.Schedule_ID = schedule_id
+	resultCard, err := cU.cardRepo.CreateCardLesson(card, mentor_id)
 	if err != nil {
 		log.Error(err)
 		return nil, err

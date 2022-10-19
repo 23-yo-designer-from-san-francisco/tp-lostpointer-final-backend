@@ -113,7 +113,7 @@ func (mD *MentorDelivery) GetMentors(c *gin.Context) {
 }
 
 func (mD* MentorDelivery) DeleteMentor(c *gin.Context) {
-	message := logMessage + "GetMentors:"
+	message := logMessage + "DeleteMentor:"
 	log.Debug(message + "started")
 
 	idStr := c.Param("mentor_id")
@@ -132,6 +132,33 @@ func (mD* MentorDelivery) DeleteMentor(c *gin.Context) {
 	response := &models.Response{
 		Status: http.StatusOK,
 		Response: "OK",
+	}
+	c.JSON(http.StatusOK, response)
+}
+
+func (mD* MentorDelivery) GetPersonalImages(c *gin.Context) {
+	message := logMessage + "GetPersonalImages:"
+	log.Debug(message + "started")
+
+	// idStr := c.Param("mentor_id")
+	// id, err := strconv.Atoi(idStr)
+	// if err != nil {
+	// 	log.Error(message + "err = ", err)
+	// 	return
+	// }
+
+	//Cause no authorization rn
+	id := 1;
+
+	resultPersonalImages, err := mD.mentorUsecase.GetPersonalImages(id)
+	if err != nil {
+		log.Error(message + "err = ", err)
+		return
+	}
+
+	response := &models.Response{
+		Status: http.StatusOK,
+		Response: resultPersonalImages,
 	}
 	c.JSON(http.StatusOK, response)
 }

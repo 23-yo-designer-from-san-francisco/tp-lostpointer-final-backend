@@ -47,7 +47,7 @@ func (cD *CardDelivery) CreateCardDay(c *gin.Context) {
 		card.ImgUUID = imgUUID
 	}
 
-	resultCard, err := cD.cardUsecase.CreateCardDay(card, imgUUID, scheduleID)
+	resultCard, err := cD.cardUsecase.CreateCardDay(card, scheduleID)
 	if err != nil {
 		c.Error(err)
 		return
@@ -88,7 +88,7 @@ func (cD *CardDelivery) CreateCardLesson(c *gin.Context) {
 		card.ImgUUID = imgUUID
 	}
 
-	resultCard, err := cD.cardUsecase.CreateCardLesson(card, imgUUID, scheduleID)
+	resultCard, err := cD.cardUsecase.CreateCardLesson(card, scheduleID)
 	if err != nil {
 		c.Error(err)
 		return

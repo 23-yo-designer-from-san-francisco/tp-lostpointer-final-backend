@@ -15,6 +15,7 @@ func MentorEndpoints(r *gin.RouterGroup, mD *mentorD.MentorDelivery) {
 	r.GET("/profile/:mentor_id", mD.GetMentor)
 	r.GET("", mD.GetMentors)
 	r.POST("/profile/:mentor_id/goodbye", mD.DeleteMentor)
+	r.GET("/images", mD.GetPersonalImages)
 }
 
 func ChildEndpoints(r *gin.RouterGroup, cD *childD.ChildDelivery) {

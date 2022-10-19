@@ -11,4 +11,5 @@ type Repository interface {
 	UpdateMentor(*models.Mentor) (*models.Mentor, error)
 	GetMentorByEmail(string) (*models.Mentor, error)
 	DeleteMentor(int) (error)
+	GetPersonalImages(int) ([]*models.PersonalImage, error)
 }

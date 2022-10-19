@@ -10,4 +10,5 @@ type Usecase interface {
 	GetMentors() ([]*models.Mentor, error)
 	UpdateMentor(*models.Mentor) (*models.Mentor, error)
 	DeleteMentor(int) (error)
+	GetPersonalImages(int) ([]*models.PersonalImage, error)
 }
