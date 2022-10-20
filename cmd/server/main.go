@@ -1,57 +1,85 @@
 package main
 
 import (
-	"log"
+	"context"
+	"fmt"
+	"net/http"
 	"os"
-	"time"
 	"os/signal"
 	"syscall"
-	"net/http"
-	"context"
+	"time"
+
+	mentorDelivery "autfinal/internal/microservice/mentor/delivery"
+	mentorRepo "autfinal/internal/microservice/mentor/repository"
+	mentorUsecase "autfinal/internal/microservice/mentor/usecase"
+
+	childDelivery "autfinal/internal/microservice/child/delivery"
+	childRepo "autfinal/internal/microservice/child/repository"
+	childUsecase "autfinal/internal/microservice/child/usecase"
+
+	scheduleDelivery "autfinal/internal/microservice/schedule/delivery"
+	scheduleRepo "autfinal/internal/microservice/schedule/repository"
+	scheduleUsecase "autfinal/internal/microservice/schedule/usecase"
 
 	cardDelivery "autfinal/internal/microservice/card/delivery"
 	cardRepo "autfinal/internal/microservice/card/repository"
 	cardUsecase "autfinal/internal/microservice/card/usecase"
 
-	"autfinal/internal/router"
+	log "autfinal/pkg/logger"
+
 	"autfinal/internal/middleware"
+	"autfinal/internal/router"
 	"autfinal/internal/utils"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
+const logMessage = "server:"
+
 func main() {
-	l := log.New(os.Stdout, "Diploma-API", log.LstdFlags)
+	message := logMessage + "Main:"
+	log.Init(logrus.DebugLevel)
+	log.Info(fmt.Sprintf(message+"started, log level = %s", logrus.DebugLevel))
 
 	viper.AddConfigPath("../../config")
 	viper.SetConfigName("config")
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Print("Config isn't found 1")
+		log.Error("Config isn't found 1")
 		os.Exit(1)
 	}
 	viper.SetConfigFile("../../.env")
 	err = viper.MergeInConfig()
 	if err != nil {
-		log.Print("Config isn't found 2")
+		log.Error("Config isn't found 2")
 		os.Exit(1)
 	}
 
 	postgresDB, err := utils.InitPostgres()
 	if err != nil {
-		log.Print("InitPG")
-		log.Println(err)
+		log.Error(err)
 		os.Exit(1)
 	}
 
 	mws := middleware.NewMiddleware()
 
+	mentorR := mentorRepo.NewMentorRepository(postgresDB)
+	childR := childRepo.NewChildRepository(postgresDB)
+	scheduleR := scheduleRepo.NewScheduleRepository(postgresDB)
 	cardR := cardRepo.NewCardRepository(postgresDB)
 
-	cardU := cardUsecase.NewCardUsecase(cardR)
+	mentorU := mentorUsecase.NewMentorUsecase(mentorR)
+	childU := childUsecase.NewChildUsecase(childR)
+	scheduleU := scheduleUsecase.NewScheduleUsecase(scheduleR)
+	cardU := cardUsecase.NewCardUsecase(scheduleR, cardR)
 
+	mentorD := mentorDelivery.NewMentorDelivery(mentorU)
+	childD := childDelivery.NewChildDelivery(childU)
+	scheduleD := scheduleDelivery.NewScheduleDelivery(scheduleU)
 	cardD := cardDelivery.NewCardDelivery(cardU)
+
 
 	baseRouter := gin.New()
 	baseRouter.Use(gin.Logger())
@@ -61,14 +89,28 @@ func main() {
 
 	routerAPI := baseRouter.Group("/api")
 
-	userRouter := routerAPI.Group("/cards")
-	router.CardEndpoints(userRouter, mws, cardD)
+	mentorRouter := routerAPI.Group("/mentors")
+	router.MentorEndpoints(mentorRouter,mentorD)
+
+	childRouter := routerAPI.Group("/childs")
+	router.ChildEndpoints(childRouter, childD)
+
+	scheduleDayRouter := childRouter.Group("/:child_id/schedules/day")
+	router.ScheduleDayEndpoints(scheduleDayRouter, scheduleD)
+
+	scheduleLessonRouter := childRouter.Group("/:child_id/schedules/lesson")
+	router.ScheduleLessonEndpoints(scheduleLessonRouter, scheduleD)
+
+	cardDayRouter := routerAPI.Group("/schedules/day/:schedule_id/cards")
+	router.CardDayEndpoints(cardDayRouter, cardD)
+
+	cardLessonRouter := routerAPI.Group("/schedules/lesson/:schedule_id/cards")
+	router.CardLessonEndpoints(cardLessonRouter, cardD)
 
 	port := viper.GetString("server.port")
 
 	server := &http.Server{
 		Addr: ":"+port,
-		ErrorLog: l,
 		Handler: baseRouter,
 		IdleTimeout: 10 * time.Minute,
 		ReadTimeout: 10 * time.Second,
@@ -78,7 +120,8 @@ func main() {
 	go func() {
 		err := server.ListenAndServe()
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
+			os.Exit(1)
 		}
 	}()
 	
@@ -86,7 +129,7 @@ func main() {
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, syscall.SIGTERM)
 	sig := <- sigChan
-	log.Println("Graceful shutdown", sig)
+	log.Info("Graceful shutdown:", sig)
 
 	timeoutContext, _ := context.WithTimeout(context.Background(), 30 * time.Second)
 	server.Shutdown(timeoutContext)

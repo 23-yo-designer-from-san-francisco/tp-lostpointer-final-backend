@@ -23,7 +23,7 @@ func NewMiddleware() *Middlewares {
 func (m *Middlewares) MiddlewareCardFormData() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		inputCard := c.Request.FormValue("json")
-		card := new(models.Card)
+		card := new(models.CardDay)
 		json.Unmarshal([]byte(inputCard), &card)
 
 		c.Set("card", *card)

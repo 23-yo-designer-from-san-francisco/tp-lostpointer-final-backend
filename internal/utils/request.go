@@ -16,8 +16,6 @@ import (
 )
 
 func SaveImageFromRequest(c *gin.Context, httpRequestKey string) (string, error) {
-	serverName := viper.GetString("server.name")
-
 	avatarFile, handler, err := c.Request.FormFile(httpRequestKey)
 	if err != nil {
 		return "", err
@@ -25,6 +23,7 @@ func SaveImageFromRequest(c *gin.Context, httpRequestKey string) (string, error)
 	defer avatarFile.Close()
 
 	var img image.Image
+	var resultFilenameExtension string
 
 	filenameParts := strings.Split(handler.Filename, ".")
 	filenameExtension := strings.ToLower(filenameParts[len(filenameParts)-1])
@@ -32,8 +31,8 @@ func SaveImageFromRequest(c *gin.Context, httpRequestKey string) (string, error)
 	
 	switch filenameExtension {
 		case "jpg", "jpeg", "png":
-			filenameExtension = "webp"
-		case "ico","woff","swg","webp","webm","gif":
+			resultFilenameExtension = "webp"
+		case "webp":
 		default:
 			return "", nil //make error later
 	}
@@ -43,7 +42,7 @@ func SaveImageFromRequest(c *gin.Context, httpRequestKey string) (string, error)
 		return "", err
 	}
 
-	resultFileName := newFilename + "." + filenameExtension
+	resultFileName := newFilename + "." + resultFilenameExtension
 	output, err := os.Create(viper.GetString("img_path") + "/" + resultFileName)
 	if err != nil {
 		return "", err
@@ -66,11 +65,16 @@ func SaveImageFromRequest(c *gin.Context, httpRequestKey string) (string, error)
 		if err != nil {
 			return "", err
 		}
-		return serverName + "/images/" + resultFileName, nil
+		return newFilename, nil
 	}
 
 	if err := webp.Encode(output, img, options); err != nil {
 		return "", err
 	}
-	return serverName + "/images/" + resultFileName, nil
+	return newFilename, nil
 }
+
+func MakeImageName(ImgUUID string) string {
+	return 	viper.GetString("server.name") + "/images/" + ImgUUID +".webp"
+}
+

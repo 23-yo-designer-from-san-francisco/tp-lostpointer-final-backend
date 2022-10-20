@@ -9,7 +9,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - /home/artyom/autfinal/static/images:/autfinal/static/images
+      - ./images:/autfinal/static/images
     depends_on:
       - postgres
 
@@ -25,8 +25,16 @@ services:
     env_file:
       - .env
     volumes:
-      - autfinal-postgres-data:/var/lib/postgresql/data
+      - ./db_data:/var/lib/postgresql/data
       - ./db:/docker-entrypoint-initdb.d
 
-volumes:
-  autfinal-postgres-data:
+  nginx:
+    image: nginx:mainline-alpine
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    volumes:
+      - ./images:/home/ubuntu/static/images
+      - ./config/nginx:/etc/nginx/conf.d
+    depends_on:
+      - "autfinal"
