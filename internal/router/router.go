@@ -50,7 +50,7 @@ func CardDayEndpoints(r *gin.RouterGroup, cD *cardD.CardDelivery) {
 	r.GET("/:card_id", cD.GetCardDay)
 	r.POST("/:card_id", cD.UpdateCardDay)
 	r.POST("/order", cD.UpdateCardsDayOrder)
-	r.POST("/card_id/goodbye", cD.DeleteCardDay)
+	r.POST("/:card_id/goodbye", cD.DeleteCardDay)
 }
 
 func CardLessonEndpoints(r *gin.RouterGroup, cD *cardD.CardDelivery) {
