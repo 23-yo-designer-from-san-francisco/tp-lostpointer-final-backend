@@ -25,6 +25,10 @@ import (
 	cardRepo "autfinal/internal/microservice/card/repository"
 	cardUsecase "autfinal/internal/microservice/card/usecase"
 
+	imageDelivery "autfinal/internal/microservice/stock_image/delivery"
+	imageRepo "autfinal/internal/microservice/stock_image/repository"
+	imageUsecase "autfinal/internal/microservice/stock_image/usecase"
+
 	log "autfinal/pkg/logger"
 
 	"autfinal/internal/middleware"
@@ -69,16 +73,19 @@ func main() {
 	childR := childRepo.NewChildRepository(postgresDB)
 	scheduleR := scheduleRepo.NewScheduleRepository(postgresDB)
 	cardR := cardRepo.NewCardRepository(postgresDB)
+	imageR := imageRepo.NewImageRepository(postgresDB)
 
 	mentorU := mentorUsecase.NewMentorUsecase(mentorR)
 	childU := childUsecase.NewChildUsecase(childR)
 	scheduleU := scheduleUsecase.NewScheduleUsecase(scheduleR)
 	cardU := cardUsecase.NewCardUsecase(scheduleR, cardR)
+	imageU := imageUsecase.NewImageUsecase(imageR)
 
 	mentorD := mentorDelivery.NewMentorDelivery(mentorU)
 	childD := childDelivery.NewChildDelivery(childU)
 	scheduleD := scheduleDelivery.NewScheduleDelivery(scheduleU)
 	cardD := cardDelivery.NewCardDelivery(cardU)
+	imageD := imageDelivery.NewImageDelivery(imageU)
 
 
 	baseRouter := gin.New()
@@ -106,6 +113,9 @@ func main() {
 
 	cardLessonRouter := routerAPI.Group("/schedules/lesson/:schedule_id/cards")
 	router.CardLessonEndpoints(cardLessonRouter, cardD)
+
+	imageRouter := routerAPI.Group("/stock")
+	router.ImagesEndpoints(imageRouter, imageD)
 
 	port := viper.GetString("server.port")
 

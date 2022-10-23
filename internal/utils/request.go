@@ -1,17 +1,18 @@
 package utils
 
 import (
+	"autfinal/internal/models"
 	"image"
 	"image/jpeg"
 	"image/png"
 	"io"
 	"os"
 	"strings"
-	
+
 	"github.com/gin-gonic/gin"
-	uuid "github.com/satori/go.uuid"
 	"github.com/kolesa-team/go-webp/encoder"
 	"github.com/kolesa-team/go-webp/webp"
+	uuid "github.com/satori/go.uuid"
 	"github.com/spf13/viper"
 )
 
@@ -78,3 +79,9 @@ func MakeImageName(ImgUUID string) string {
 	return 	viper.GetString("server.name") + "/images/" + ImgUUID +".webp"
 }
 
+func ChangeImgUuidToImgUrlAll(images []*models.StockImage) ([]*models.StockImage) {
+	for _, image := range images {
+		image.ImgUrl = MakeImageName(image.ImgUUID)
+	}
+	return images
+}
