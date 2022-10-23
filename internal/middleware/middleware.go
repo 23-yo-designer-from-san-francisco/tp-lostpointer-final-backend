@@ -7,8 +7,10 @@ import (
 	"log"
 )
 
-var allowedOrigins = []string{"", "http://45.141.102.243:8080", "http://127.0.0.1:8080", 
-	"http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://127.0.0.1:5174"}
+var allowedOrigins = []string{"", "http://127.0.0.1:8080", 
+	"http://localhost:5173", "http://localhost:5174", "http://127.0.0.1:5173", "http://127.0.0.1:5174", 
+	"http://lostpointer.tech", "https://lostpointer.tech",
+}
 
 type Middlewares struct {
 	
