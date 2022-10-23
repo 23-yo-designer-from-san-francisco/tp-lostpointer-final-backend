@@ -68,6 +68,15 @@ type PersonalImage struct {
 	ImgUUID string `json:"-" db:"imguuid"`
 }
 
+type StockImage struct {
+	ID int `json:"id,omitempty" db:"id"`
+	Category string `json:"category,omitempty" category:"id"`
+	Names []string `json:"names,omitempty" db:"-"` 
+	Name string `json:"name,omitempty" db:"name"`
+	ImgUrl string `json:"imgUrl,omitempty" db:"-"`
+	ImgUUID string `json:"-" db:"imguuid"`
+}
+
 type Mentors struct {
 	Mentors []*Mentor `json:"mentors,omitempty"`
 }

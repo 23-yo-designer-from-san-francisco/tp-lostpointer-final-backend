@@ -5,9 +5,16 @@ import (
 	mentorD "autfinal/internal/microservice/mentor/delivery"
 	childD "autfinal/internal/microservice/child/delivery"
 	scheduleD "autfinal/internal/microservice/schedule/delivery"
+	imageD "autfinal/internal/microservice/stock_image/delivery"
 
 	"github.com/gin-gonic/gin"
 )
+
+func ImagesEndpoints(r *gin.RouterGroup, iD *imageD.ImageDelivery) {
+	r.GET("", iD.GetStockImages)
+	r.POST("", iD.CreateStockImage)
+	r.GET("/search", iD.SearchStockImages)
+}
 
 func MentorEndpoints(r *gin.RouterGroup, mD *mentorD.MentorDelivery) {
 	r.POST("", mD.CreateMentor)
@@ -50,7 +57,7 @@ func CardDayEndpoints(r *gin.RouterGroup, cD *cardD.CardDelivery) {
 	r.GET("/:card_id", cD.GetCardDay)
 	r.POST("/:card_id", cD.UpdateCardDay)
 	r.POST("/order", cD.UpdateCardsDayOrder)
-	r.POST("/card_id/goodbye", cD.DeleteCardDay)
+	r.POST("/:card_id/goodbye", cD.DeleteCardDay)
 }
 
 func CardLessonEndpoints(r *gin.RouterGroup, cD *cardD.CardDelivery) {
