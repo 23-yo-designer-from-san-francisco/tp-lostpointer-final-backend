@@ -3,44 +3,46 @@ package repository
 import (
 	"autfinal/internal/models"
 	log "autfinal/pkg/logger"
+	"errors"
 	"github.com/jmoiron/sqlx"
+	"time"
 )
 
 const logMessage = "microservice:card:repository:"
 
 const (
 	createCardDayQuery = `insert into "card_day" (name, imguuid, startTime, endTime, orderPlace, schedule_id) values ($1, $2, $3, $4, (select cards_count from "schedule_day" where "id" = $5) + 1, $5) 
-		returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
-	// createCardWOEndTimeQuery = `insert into "card_day" (name, imguuid, startTime, orderPlace, schedule_id) values ($1, $2, $3, (select COUNT(id) + 1 from "card_day" where schedule_id = $4), $4) 
+		returning id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id;`
+	// createCardWOEndTimeQuery = `insert into "card_day" (name, imguuid, startTime, orderPlace, schedule_id) values ($1, $2, $3, (select COUNT(id) + 1 from "card_day" where schedule_id = $4), $4)
 	// 	returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
-	// createCardWOStartTimeQuery = `insert into "card_day" (name, imguuid, orderPlace, schedule_id) values ($1, $2, (select COUNT(id) + 1 from "card_day" where schedule_id = $3), $3) 
+	// createCardWOStartTimeQuery = `insert into "card_day" (name, imguuid, orderPlace, schedule_id) values ($1, $2, (select COUNT(id) + 1 from "card_day" where schedule_id = $3), $3)
 	// 	returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
-	// createCardOnlyImgQuery = `insert into "card_day" (imguuid, orderPlace, schedule_id) values ($1, (select COUNT(id) + 1 from "card_day" where schedule_id = $2), $2) 
+	// createCardOnlyImgQuery = `insert into "card_day" (imguuid, orderPlace, schedule_id) values ($1, (select COUNT(id) + 1 from "card_day" where schedule_id = $2), $2)
 	// 	returning id, done, imguuid, orderPlace, schedule_id;`
 
-	getCardsDayQuery = `select id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and deletedAt is null order by orderPlace;`
-	getCardDayQuery  = `select id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and id = $2;`
+	getCardsDayQuery = `select id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and deletedAt is null order by orderPlace;`
+	getCardDayQuery  = `select id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and id = $2;`
 
 	updateCardDayQuery = `update "card_day" set name = $1, done = $2, imguuid = $3, startTime = $4, endTime = $5 where schedule_id = $6 and id = $7 
-		returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
+		returning id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id;`
 	updateCardDayWOImgQuery = `update "card_day" set name = $1, done = $2, startTime = $3, endTime = $4 where schedule_id = $5 and id = $6 
-		returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
+		returning id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id;`
 	updateCardDayOrder = `update "card_day" set orderPlace = $1 where schedule_id = $2 and id = $3 
-		returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
-	safeDeleteCardDay = `update "card_day" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
+		returning id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id;`
+	safeDeleteCardDay              = `update "card_day" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
 	changeOrderCardsDayAfterDelete = `update "card_day" set orderPlace = (orderPlace - 1) where orderPlace > $1;`
 
 	createCardLessonQuery = `insert into "card_lesson" (name, imguuid, duration, orderPlace, schedule_id) values ($1, $2, $3, (select cards_count from "schedule_lesson" where "id" = $4) + 1, $4) 
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
-	getCardsLessonQuery = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and deletedAt is null order by orderPlace;`
-	getCardLessonQuery = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and id = $2;`
+	getCardsLessonQuery   = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and deletedAt is null order by orderPlace;`
+	getCardLessonQuery    = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and id = $2;`
 	updateCardLessonQuery = `update "card_lesson" set name = $1, done = $2, imguuid = $3, duration = $4 where schedule_id = $5 and id = $6 
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
 	updateCardLessonWOImgQuery = `update "card_lesson" set name = $1, done = $2, duration = $3 where schedule_id = $4 and id = $5
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
 	updateCardLessonOrder = `update "card_lesson" set orderPlace = $1 where schedule_id = $2 and id = $3 
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
-	safeDeleteCardLesson = `update "card_lesson" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
+	safeDeleteCardLesson              = `update "card_lesson" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
 	changeOrderCardsLessonAfterDelete = `update "card_lesson" set orderPlace = (orderPlace - 1) where orderPlace > $1;`
 
 	savePersonalImageQuery = `insert into "personal_image" (imguuid, mentor_id) values ($1, $2);`
@@ -56,17 +58,50 @@ func NewCardRepository(db *sqlx.DB) *CardRepository {
 	}
 }
 
+func getTimes(CardDay *models.CardDay) (*time.Time, *time.Time, error) {
+	startTime := &time.Time{}
+	if CardDay.StartTime != nil {
+		time_, err := time.Parse("15:04", *CardDay.StartTime)
+		if err != nil {
+			return nil, nil, err
+		}
+		startTime = &time_
+	} else {
+		startTime = nil
+	}
+	endTime := &time.Time{}
+	if startTime != nil && CardDay.EndTime != nil {
+		time_, err := time.Parse("15:04", *CardDay.EndTime)
+		if err != nil {
+			return nil, nil, err
+		}
+		endTime = &time_
+		if endTime.Before(*startTime) {
+			return nil, nil, errors.New("start time >= end time")
+		}
+	} else {
+		endTime = nil
+	}
+	return startTime, endTime, nil
+}
+
 func (cR *CardRepository) CreateCardDay(CardDay *models.CardDay, mentor_id int) (*models.CardDay, error) {
 	message := logMessage + "CreateCardDay:"
 	log.Debug(message + "started")
 
-	var resultCard models.CardDay
-	tx, err :=  cR.db.Beginx()
+	startTime, endTime, err := getTimes(CardDay)
 	if err != nil {
 		log.Error(message+"err = ", err)
 		return nil, err
 	}
-	err = tx.QueryRowx(createCardDayQuery, &CardDay.Name, &CardDay.ImgUUID, &CardDay.StartTime, &CardDay.EndTime, &CardDay.Schedule_ID).StructScan(&resultCard)
+
+	var resultCard models.CardDay
+	tx, err := cR.db.Beginx()
+	if err != nil {
+		log.Error(message+"err = ", err)
+		return nil, err
+	}
+	err = tx.QueryRowx(createCardDayQuery, &CardDay.Name, &CardDay.ImgUUID, &startTime, &endTime, &CardDay.Schedule_ID).StructScan(&resultCard)
 	if err != nil {
 		log.Error(message+"err = ", err)
 		tx.Rollback()
@@ -168,13 +203,19 @@ func (cR *CardRepository) GetCardLesson(scheduleID, cardID int) (*models.CardLes
 func (cR *CardRepository) UpdateCardDay(card *models.CardDay, scheduleID, cardID int) (*models.CardDay, error) {
 	message := logMessage + "UpdateCardDay:"
 	log.Debug(message + "started")
-	
+
 	var err error
+	startTime, endTime, err := getTimes(card)
+	if err != nil {
+		log.Error(message+"err = ", err)
+		return nil, err
+	}
+
 	resultCard := models.CardDay{}
 	if card.ImgUUID == "" {
-		err = cR.db.QueryRowx(updateCardDayWOImgQuery, &card.Name, &card.Done, &card.StartTime, &card.EndTime, &scheduleID, &cardID).StructScan(&resultCard)
+		err = cR.db.QueryRowx(updateCardDayWOImgQuery, &card.Name, &card.Done, &startTime, &endTime, &scheduleID, &cardID).StructScan(&resultCard)
 	} else {
-		err = cR.db.QueryRowx(updateCardDayQuery, &card.Name, &card.Done, &card.ImgUUID, &card.StartTime, &card.EndTime, &scheduleID, &cardID).StructScan(&resultCard)
+		err = cR.db.QueryRowx(updateCardDayQuery, &card.Name, &card.Done, &card.ImgUUID, &startTime, &endTime, &scheduleID, &cardID).StructScan(&resultCard)
 	}
 	if err != nil {
 		log.Error(message+"err = ", err)
@@ -190,7 +231,7 @@ func (cR *CardRepository) UpdateCardLesson(card *models.CardLesson, scheduleID, 
 	var err error
 	resultCard := models.CardLesson{}
 	if card.ImgUUID == "" {
-		err = cR.db.QueryRowx(updateCardLessonWOImgQuery, &card.Name, &card.Done, &card.Duration, &scheduleID, &cardID).StructScan(&resultCard)	
+		err = cR.db.QueryRowx(updateCardLessonWOImgQuery, &card.Name, &card.Done, &card.Duration, &scheduleID, &cardID).StructScan(&resultCard)
 	} else {
 		err = cR.db.QueryRowx(updateCardLessonQuery, &card.Name, &card.Done, &card.ImgUUID, &card.Duration, &scheduleID, &cardID).StructScan(&resultCard)
 	}
@@ -243,7 +284,7 @@ func (cR *CardRepository) UpdateCardsLessonOrder(cards []*models.CardLesson, sch
 	return nil
 }
 
-func (cR *CardRepository) DeleteCardDay(scheduleID, cardID int) (error) {
+func (cR *CardRepository) DeleteCardDay(scheduleID, cardID int) error {
 	message := logMessage + "DeleteCardDay:"
 	log.Debug(message + "started")
 
@@ -259,7 +300,7 @@ func (cR *CardRepository) DeleteCardDay(scheduleID, cardID int) (error) {
 		tx.Rollback()
 		return err
 	}
-	_, err = tx.Exec(changeOrderCardsDayAfterDelete, &deletedOrderPlace) 
+	_, err = tx.Exec(changeOrderCardsDayAfterDelete, &deletedOrderPlace)
 	if err != nil {
 		log.Error(message+"err = ", err)
 		tx.Rollback()
@@ -269,7 +310,7 @@ func (cR *CardRepository) DeleteCardDay(scheduleID, cardID int) (error) {
 	return nil
 }
 
-func (cR *CardRepository) DeleteCardLesson(scheduleID, cardID int) (error) {
+func (cR *CardRepository) DeleteCardLesson(scheduleID, cardID int) error {
 	message := logMessage + "DeleteCardLesson:"
 	log.Debug(message + "started")
 
@@ -285,7 +326,7 @@ func (cR *CardRepository) DeleteCardLesson(scheduleID, cardID int) (error) {
 		tx.Rollback()
 		return err
 	}
-	_, err = tx.Exec(changeOrderCardsLessonAfterDelete, &deletedOrderPlace) 
+	_, err = tx.Exec(changeOrderCardsLessonAfterDelete, &deletedOrderPlace)
 	if err != nil {
 		log.Error(message+"err = ", err)
 		tx.Rollback()
