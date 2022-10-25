@@ -22,6 +22,7 @@ const (
 	incrementOrderPlaceCardDayQuery  = `update "card_day" set orderplace = orderplace + 1 where schedule_id = $1 and deletedat IS NULL and orderplace >= $2;`
 	checkEmptyOrderPlaceCardDayQuery = `select count(id) from "card_day" where schedule_id = $1 and deletedat IS NULL and orderplace = $2;`
 	getMaxOrderPlaceCardDayQuery     = `select max(orderplace) from "card_day" where schedule_id = $1 and deletedat IS NULL;`
+	getCardDayCountQuery             = `select count(id) from "card_day" where schedule_id = $1 and deletedat IS NULL;`
 
 	getCardsDayQuery = `select id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and deletedAt is null order by orderPlace;`
 	getCardDayQuery  = `select id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and id = $2;`
@@ -41,6 +42,7 @@ const (
 	incrementOrderPlaceCardLessonQuery  = `update "card_lesson" set orderplace = orderplace + 1 where schedule_id = $1 and deletedat IS NULL and orderplace >= $2;`
 	checkEmptyOrderPlaceCardLessonQuery = `select count(id) from "card_lesson" where schedule_id = $1 and deletedat IS NULL and orderplace = $2;`
 	getMaxOrderPlaceCardLessonQuery     = `select max(orderplace) from "card_lesson" where schedule_id = $1 and deletedat IS NULL;`
+	getCardLessonCountQuery             = `select count(id) from "card_lesson" where schedule_id = $1 and deletedat IS NULL;`
 
 	getCardsLessonQuery = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and deletedAt is null order by orderPlace;`
 	getCardLessonQuery  = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and id = $2;`
@@ -342,10 +344,37 @@ func (cR *CardRepository) UpdateCardsDayOrder(cards []*models.CardDay, schedule_
 	message := logMessage + "UpdateCardsDayOrder:"
 	log.Debug(message + "started")
 
+	if len(cards) == 0 {
+		return nil
+	}
+	// мапа, чтобы проверить, что все order'ы в списке карточек разные
+	ordersMap := map[int]bool{}
+	for _, card := range cards {
+		if card.Order < 1 || card.Schedule_ID != schedule_id {
+			return nil
+		}
+		_, exist := ordersMap[card.Order]
+		if exist {
+			return nil
+		}
+		ordersMap[card.Order] = true
+	}
+
 	tx, err := cR.db.Begin()
 	if err != nil {
 		log.Error(message+"err = ", err)
 		return err
+	}
+
+	var cardsCount int
+	err = tx.QueryRow(getCardDayCountQuery, schedule_id).Scan(&cardsCount)
+	if err != nil {
+		log.Error(message+"err = ", err)
+		tx.Rollback()
+		return err
+	}
+	if len(cards) != cardsCount {
+		return nil
 	}
 	for _, card := range cards {
 		_, err := tx.Exec(updateCardDayOrder, card.Order, schedule_id, card.ID)
@@ -363,10 +392,24 @@ func (cR *CardRepository) UpdateCardsLessonOrder(cards []*models.CardLesson, sch
 	message := logMessage + "UpdateCardsLessonOrder:"
 	log.Debug(message + "started")
 
+	if len(cards) == 0 {
+		return nil
+	}
+
 	tx, err := cR.db.Begin()
 	if err != nil {
 		log.Error(message+"err = ", err)
 		return err
+	}
+	var cardsCount int
+	err = tx.QueryRow(getCardLessonCountQuery, schedule_id).Scan(&cardsCount)
+	if err != nil {
+		log.Error(message+"err = ", err)
+		tx.Rollback()
+		return err
+	}
+	if len(cards) != cardsCount {
+		return nil
 	}
 	for _, card := range cards {
 		_, err := tx.Exec(updateCardLessonOrder, card.Order, schedule_id, card.ID)
