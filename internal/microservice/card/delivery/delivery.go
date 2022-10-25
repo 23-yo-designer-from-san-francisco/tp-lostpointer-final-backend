@@ -224,7 +224,7 @@ func (cD *CardDelivery) UpdateCardDay(c *gin.Context) {
 	if cardJsonStr != "" {
 		json.Unmarshal([]byte(cardJsonStr), &card)
 	}
-	
+
 	imgUUID, err := utils.SaveImageFromRequest(c, "image")
 	if err != nil {
 		log.Error(err)
@@ -298,14 +298,14 @@ func (cD *CardDelivery) UpdateCardsDayOrder(c *gin.Context) {
 		return
 	}
 
-	var cards []*models.CardDay
+	var cards = &models.CardsDay{}
 	err = c.ShouldBindJSON(cards)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	resultCards, err := cD.cardUsecase.UpdateCardsDayOrder(cards, scheduleID)
+	resultCards, err := cD.cardUsecase.UpdateCardsDayOrder(cards.Cards, scheduleID)
 	if err != nil {
 		c.Error(err)
 		return
@@ -327,14 +327,14 @@ func (cD *CardDelivery) UpdateCardsLessonOrder(c *gin.Context) {
 		return
 	}
 
-	var cards []*models.CardLesson
+	var cards = &models.CardsLesson{}
 	err = c.ShouldBindJSON(cards)
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	resultCards, err := cD.cardUsecase.UpdateCardsLessonOrder(cards, scheduleID)
+	resultCards, err := cD.cardUsecase.UpdateCardsLessonOrder(cards.Cards, scheduleID)
 	if err != nil {
 		c.Error(err)
 		return
