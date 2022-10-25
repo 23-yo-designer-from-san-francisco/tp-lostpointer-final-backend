@@ -11,7 +11,7 @@ import (
 const logMessage = "microservice:card:repository:"
 
 const (
-	createCardDayQuery = `insert into "card_day" (name, imguuid, startTime, endTime, orderPlace, schedule_id) values ($1, $2, $3, $4, (select cards_count from "schedule_day" where "id" = $5) + 1, $5) 
+	createCardDayQuery = `insert into "card_day" (name, imguuid, startTime, endTime, orderPlace, schedule_id) values ($1, $2, $3, $4, $5, $6) 
 		returning id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id;`
 	// createCardWOEndTimeQuery = `insert into "card_day" (name, imguuid, startTime, orderPlace, schedule_id) values ($1, $2, $3, (select COUNT(id) + 1 from "card_day" where schedule_id = $4), $4)
 	// 	returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
@@ -19,6 +19,9 @@ const (
 	// 	returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
 	// createCardOnlyImgQuery = `insert into "card_day" (imguuid, orderPlace, schedule_id) values ($1, (select COUNT(id) + 1 from "card_day" where schedule_id = $2), $2)
 	// 	returning id, done, imguuid, orderPlace, schedule_id;`
+	incrementOrderPlaceCardDayQuery  = `update "card_day" set orderplace = orderplace + 1 where schedule_id = $1 and deletedat IS NULL and orderplace >= $2;`
+	checkEmptyOrderPlaceCardDayQuery = `select count(id) from "card_day" where schedule_id = $1 and deletedat IS NULL and orderplace = $2;`
+	getMaxOrderPlaceCardDayQuery     = `select max(orderplace) from "card_day" where schedule_id = $1 and deletedat IS NULL;`
 
 	getCardsDayQuery = `select id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and deletedAt is null order by orderPlace;`
 	getCardDayQuery  = `select id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and id = $2;`
@@ -29,21 +32,28 @@ const (
 		returning id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id;`
 	updateCardDayOrder = `update "card_day" set orderPlace = $1 where schedule_id = $2 and id = $3 
 		returning id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id;`
-	safeDeleteCardDay              = `update "card_day" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
-	changeOrderCardsDayAfterDelete = `update "card_day" set orderPlace = (orderPlace - 1) where orderPlace > $1;`
 
-	createCardLessonQuery = `insert into "card_lesson" (name, imguuid, duration, orderPlace, schedule_id) values ($1, $2, $3, (select cards_count from "schedule_lesson" where "id" = $4) + 1, $4) 
+	safeDeleteCardDay = `update "card_day" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
+	// changeOrderCardsDayAfterDelete = `update "card_day" set orderPlace = (orderPlace - 1) where orderPlace > $1;`
+
+	createCardLessonQuery = `insert into "card_lesson" (name, imguuid, duration, orderPlace, schedule_id) values ($1, $2, $3, $4, $5) 
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
-	getCardsLessonQuery   = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and deletedAt is null order by orderPlace;`
-	getCardLessonQuery    = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and id = $2;`
+	incrementOrderPlaceCardLessonQuery  = `update "card_lesson" set orderplace = orderplace + 1 where schedule_id = $1 and deletedat IS NULL and orderplace >= $2;`
+	checkEmptyOrderPlaceCardLessonQuery = `select count(id) from "card_lesson" where schedule_id = $1 and deletedat IS NULL and orderplace = $2;`
+	getMaxOrderPlaceCardLessonQuery     = `select max(orderplace) from "card_lesson" where schedule_id = $1 and deletedat IS NULL;`
+
+	getCardsLessonQuery = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and deletedAt is null order by orderPlace;`
+	getCardLessonQuery  = `select id, name, done, imguuid, duration, orderPlace, schedule_id from "card_lesson" where schedule_id = $1 and id = $2;`
+
 	updateCardLessonQuery = `update "card_lesson" set name = $1, done = $2, imguuid = $3, duration = $4 where schedule_id = $5 and id = $6 
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
 	updateCardLessonWOImgQuery = `update "card_lesson" set name = $1, done = $2, duration = $3 where schedule_id = $4 and id = $5
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
 	updateCardLessonOrder = `update "card_lesson" set orderPlace = $1 where schedule_id = $2 and id = $3 
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
-	safeDeleteCardLesson              = `update "card_lesson" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
-	changeOrderCardsLessonAfterDelete = `update "card_lesson" set orderPlace = (orderPlace - 1) where orderPlace > $1;`
+
+	safeDeleteCardLesson = `update "card_lesson" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
+	// changeOrderCardsLessonAfterDelete = `update "card_lesson" set orderPlace = (orderPlace - 1) where orderPlace > $1;`
 
 	savePersonalImageQuery = `insert into "personal_image" (imguuid, mentor_id) values ($1, $2);`
 )
@@ -101,7 +111,50 @@ func (cR *CardRepository) CreateCardDay(CardDay *models.CardDay, mentor_id int) 
 		log.Error(message+"err = ", err)
 		return nil, err
 	}
-	err = tx.QueryRowx(createCardDayQuery, &CardDay.Name, &CardDay.ImgUUID, &startTime, &endTime, &CardDay.Schedule_ID).StructScan(&resultCard)
+	// если пытаемся вставить левее всех, то двигаем все
+	if CardDay.Order < 1 {
+		CardDay.Order = 1
+		_, err = tx.Exec(incrementOrderPlaceCardDayQuery, &CardDay.Schedule_ID, 1)
+		if err != nil {
+			log.Error(message+"err = ", err)
+			tx.Rollback()
+			return nil, err
+		}
+	} else {
+		// проверяем, свободен ли слот
+		var sameOrderCount int
+		err = tx.QueryRow(checkEmptyOrderPlaceCardDayQuery, &CardDay.Schedule_ID, &CardDay.Order).Scan(&sameOrderCount)
+		if err != nil {
+			log.Error(message+"err = ", err)
+			tx.Rollback()
+			return nil, err
+		}
+		// если слот свободный
+		if sameOrderCount == 0 {
+			// сравниваем новый Order с максимальным для текущего расписания
+			var maxOrder int
+			err = tx.QueryRow(getMaxOrderPlaceCardDayQuery, &CardDay.Schedule_ID).Scan(&maxOrder)
+			if err != nil {
+				log.Error(message+"err = ", err)
+				tx.Rollback()
+				return nil, err
+			}
+			// если пытаемся вставить сильно правее всех, то вставляем через одну после последней карточки
+			if CardDay.Order > (maxOrder + 2) {
+				CardDay.Order = maxOrder + 2
+			}
+		} else {
+			// свигаем Order всех карточек, что правее новой
+			_, err = tx.Exec(incrementOrderPlaceCardDayQuery, &CardDay.Schedule_ID, &CardDay.Order)
+			if err != nil {
+				log.Error(message+"err = ", err)
+				tx.Rollback()
+				return nil, err
+			}
+		}
+	}
+
+	err = tx.QueryRowx(createCardDayQuery, &CardDay.Name, &CardDay.ImgUUID, &startTime, &endTime, &CardDay.Order, &CardDay.Schedule_ID).StructScan(&resultCard)
 	if err != nil {
 		log.Error(message+"err = ", err)
 		tx.Rollback()
@@ -129,7 +182,50 @@ func (cR *CardRepository) CreateCardLesson(CardLesson *models.CardLesson, mentor
 		return nil, err
 	}
 
-	err = tx.QueryRowx(createCardLessonQuery, &CardLesson.Name, &CardLesson.ImgUUID, &CardLesson.Duration, &CardLesson.Schedule_ID).StructScan(&resultCard)
+	// если пытаемся вставить левее всех, то двигаем все
+	if CardLesson.Order < 1 {
+		CardLesson.Order = 1
+		_, err = tx.Exec(incrementOrderPlaceCardLessonQuery, &CardLesson.Schedule_ID, 1)
+		if err != nil {
+			log.Error(message+"err = ", err)
+			tx.Rollback()
+			return nil, err
+		}
+	} else {
+		// проверяем, свободен ли слот
+		var sameOrderCount int
+		err = tx.QueryRow(checkEmptyOrderPlaceCardLessonQuery, &CardLesson.Schedule_ID, &CardLesson.Order).Scan(&sameOrderCount)
+		if err != nil {
+			log.Error(message+"err = ", err)
+			tx.Rollback()
+			return nil, err
+		}
+		// если слот свободный
+		if sameOrderCount == 0 {
+			// сравниваем новый Order с максимальным для текущего расписания
+			var maxOrder int
+			err = tx.QueryRow(getMaxOrderPlaceCardLessonQuery, &CardLesson.Schedule_ID).Scan(&maxOrder)
+			if err != nil {
+				log.Error(message+"err = ", err)
+				tx.Rollback()
+				return nil, err
+			}
+			// если пытаемся вставить сильно правее всех, то вставляем через одну после последней карточки
+			if CardLesson.Order > (maxOrder + 2) {
+				CardLesson.Order = maxOrder + 2
+			}
+		} else {
+			// свигаем Order всех карточек, что правее новой
+			_, err = tx.Exec(incrementOrderPlaceCardLessonQuery, &CardLesson.Schedule_ID, &CardLesson.Order)
+			if err != nil {
+				log.Error(message+"err = ", err)
+				tx.Rollback()
+				return nil, err
+			}
+		}
+	}
+
+	err = tx.QueryRowx(createCardLessonQuery, &CardLesson.Name, &CardLesson.ImgUUID, &CardLesson.Duration, &CardLesson.Order, &CardLesson.Schedule_ID).StructScan(&resultCard)
 	if err != nil {
 		log.Error(message+"err = ", err)
 		tx.Rollback()
@@ -300,12 +396,13 @@ func (cR *CardRepository) DeleteCardDay(scheduleID, cardID int) error {
 		tx.Rollback()
 		return err
 	}
-	_, err = tx.Exec(changeOrderCardsDayAfterDelete, &deletedOrderPlace)
-	if err != nil {
-		log.Error(message+"err = ", err)
-		tx.Rollback()
-		return err
-	}
+	// не сдвигаем, оставляем пустой слот
+	//_, err = tx.Exec(changeOrderCardsDayAfterDelete, &deletedOrderPlace)
+	//if err != nil {
+	//	log.Error(message+"err = ", err)
+	//	tx.Rollback()
+	//	return err
+	//}
 	tx.Commit()
 	return nil
 }
@@ -326,12 +423,13 @@ func (cR *CardRepository) DeleteCardLesson(scheduleID, cardID int) error {
 		tx.Rollback()
 		return err
 	}
-	_, err = tx.Exec(changeOrderCardsLessonAfterDelete, &deletedOrderPlace)
-	if err != nil {
-		log.Error(message+"err = ", err)
-		tx.Rollback()
-		return err
-	}
+	// не сдвигаем, оставляем слот
+	//_, err = tx.Exec(changeOrderCardsLessonAfterDelete, &deletedOrderPlace)
+	//if err != nil {
+	//	log.Error(message+"err = ", err)
+	//	tx.Rollback()
+	//	return err
+	//}
 	tx.Commit()
 	return nil
 }
