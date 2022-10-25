@@ -21,9 +21,17 @@ import (
 	scheduleRepo "autfinal/internal/microservice/schedule/repository"
 	scheduleUsecase "autfinal/internal/microservice/schedule/usecase"
 
+	scheduleBeforeAfterDelivery "autfinal/internal/microservice/schedule_before_after/delivery"
+	scheduleBeforeAfterRepo "autfinal/internal/microservice/schedule_before_after/repository"
+	scheduleBeforeAfterUsecase "autfinal/internal/microservice/schedule_before_after/usecase"
+
 	cardDelivery "autfinal/internal/microservice/card/delivery"
 	cardRepo "autfinal/internal/microservice/card/repository"
 	cardUsecase "autfinal/internal/microservice/card/usecase"
+
+	cardBeforeAfterDelivery "autfinal/internal/microservice/card_before_after/delivery"
+	cardBeforeAfterRepo "autfinal/internal/microservice/card_before_after/repository"
+	cardBeforeAfterUsecase "autfinal/internal/microservice/card_before_after/usecase"
 
 	imageDelivery "autfinal/internal/microservice/stock_image/delivery"
 	imageRepo "autfinal/internal/microservice/stock_image/repository"
@@ -72,19 +80,25 @@ func main() {
 	mentorR := mentorRepo.NewMentorRepository(postgresDB)
 	childR := childRepo.NewChildRepository(postgresDB)
 	scheduleR := scheduleRepo.NewScheduleRepository(postgresDB)
+	scheduleBAR := scheduleBeforeAfterRepo.NewScheduleRepository(postgresDB)
 	cardR := cardRepo.NewCardRepository(postgresDB)
+	cardBAR := cardBeforeAfterRepo.NewBeforeAfterRepository(postgresDB)
 	imageR := imageRepo.NewImageRepository(postgresDB)
 
 	mentorU := mentorUsecase.NewMentorUsecase(mentorR)
 	childU := childUsecase.NewChildUsecase(childR)
 	scheduleU := scheduleUsecase.NewScheduleUsecase(scheduleR)
+	scheduleBAU := scheduleBeforeAfterUsecase.NewScheduleBeforeAfterUsecase(scheduleBAR)
 	cardU := cardUsecase.NewCardUsecase(scheduleR, cardR)
+	cardBAU := cardBeforeAfterUsecase.NewCardBeforeAfterUsecase(scheduleBAR, cardBAR)
 	imageU := imageUsecase.NewImageUsecase(imageR)
 
 	mentorD := mentorDelivery.NewMentorDelivery(mentorU)
 	childD := childDelivery.NewChildDelivery(childU)
 	scheduleD := scheduleDelivery.NewScheduleDelivery(scheduleU)
+	scheduleBAD := scheduleBeforeAfterDelivery.NewScheduleBeforeAfterDelivery(scheduleBAU)
 	cardD := cardDelivery.NewCardDelivery(cardU)
+	cardBAD := cardBeforeAfterDelivery.NewCardBeforeAfterDelivery(cardBAU)
 	imageD := imageDelivery.NewImageDelivery(imageU)
 
 
@@ -108,11 +122,17 @@ func main() {
 	scheduleLessonRouter := childRouter.Group("/:child_id/schedules/lesson")
 	router.ScheduleLessonEndpoints(scheduleLessonRouter, scheduleD)
 
+	scheduleBeforeAfterRouter := childRouter.Group("/:child_id/schedules/before_after")
+	router.ScheduleBeforeAfterEndpoints(scheduleBeforeAfterRouter, scheduleBAD)
+
 	cardDayRouter := routerAPI.Group("/schedules/day/:schedule_id/cards")
 	router.CardDayEndpoints(cardDayRouter, cardD)
 
 	cardLessonRouter := routerAPI.Group("/schedules/lesson/:schedule_id/cards")
 	router.CardLessonEndpoints(cardLessonRouter, cardD)
+
+	cardBeforeAfterRouter := routerAPI.Group("/schedules/before_after/:schedule_id/cards")
+	router.CardBeforeAfterEndpoints(cardBeforeAfterRouter, cardBAD)
 
 	imageRouter := routerAPI.Group("/stock")
 	router.ImagesEndpoints(imageRouter, imageD)
