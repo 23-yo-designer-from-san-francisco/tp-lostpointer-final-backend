@@ -60,7 +60,7 @@ func NewCardRepository(db *sqlx.DB) *CardRepository {
 
 func getTimes(CardDay *models.CardDay) (*time.Time, *time.Time, error) {
 	startTime := &time.Time{}
-	if CardDay.StartTime != nil {
+	if CardDay.StartTime != nil && *CardDay.StartTime != "" {
 		time_, err := time.Parse("15:04", *CardDay.StartTime)
 		if err != nil {
 			return nil, nil, err
@@ -70,7 +70,7 @@ func getTimes(CardDay *models.CardDay) (*time.Time, *time.Time, error) {
 		startTime = nil
 	}
 	endTime := &time.Time{}
-	if startTime != nil && CardDay.EndTime != nil {
+	if startTime != nil && CardDay.EndTime != nil && *CardDay.EndTime != "" {
 		time_, err := time.Parse("15:04", *CardDay.EndTime)
 		if err != nil {
 			return nil, nil, err
