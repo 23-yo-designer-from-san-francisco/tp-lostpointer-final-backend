@@ -2,9 +2,11 @@ package router
 
 import (
 	cardD "autfinal/internal/microservice/card/delivery"
+	cardbaD "autfinal/internal/microservice/card_before_after/delivery"
 	mentorD "autfinal/internal/microservice/mentor/delivery"
 	childD "autfinal/internal/microservice/child/delivery"
 	scheduleD "autfinal/internal/microservice/schedule/delivery"
+	schedulebaD "autfinal/internal/microservice/schedule_before_after/delivery"
 	imageD "autfinal/internal/microservice/stock_image/delivery"
 
 	"github.com/gin-gonic/gin"
@@ -51,6 +53,15 @@ func ScheduleLessonEndpoints(r *gin.RouterGroup, schD *scheduleD.ScheduleDeliver
 	r.POST("/:schedule_id/goodbye", schD.DeleteScheduleDay)
 }
 
+func ScheduleBeforeAfterEndpoints(r *gin.RouterGroup, schbaD *schedulebaD.ScheduleBeforeAfterDelivery) {
+	r.POST("", schbaD.CreateScheduleBeforeAfter)
+	r.GET("", schbaD.GetSchedulesBeforeAfter)
+	r.GET("/:schedule_id", schbaD.GetScheduleBeforeAfter)
+	r.POST("/:schedule_id", schbaD.UpdateScheduleBeforeAfter)
+	r.POST("/:schedule_id/favourite", schbaD.MakeFavouriteScheduleBeforeAfter)
+	r.POST("/:schedule_id/goodbye", schbaD.DeleteScheduleBeforeAfter)
+}
+
 func CardDayEndpoints(r *gin.RouterGroup, cD *cardD.CardDelivery) {
 	r.POST("", cD.CreateCardDay)
 	r.GET("", cD.GetCardsDay)
@@ -67,4 +78,13 @@ func CardLessonEndpoints(r *gin.RouterGroup, cD *cardD.CardDelivery) {
 	r.POST("/:card_id", cD.UpdateCardLesson)
 	r.POST("/order", cD.UpdateCardsLessonOrder)
 	r.POST("/:card_id/goodbye", cD.DeleteCardLesson)
+}
+
+func CardBeforeAfterEndpoints(r *gin.RouterGroup, cardbaD *cardbaD.CardBeforeAfterDelivery) {
+	r.POST("", cardbaD.CreateCardBeforeAfter)
+	r.GET("", cardbaD.GetCardsBeforeAfter)
+	r.GET("/:card_id", cardbaD.GetCardBeforeAfter)
+	r.POST("/:card_id", cardbaD.UpdateCardBeforeAfter)
+	r.POST("/order", cardbaD.UpdateCardsBeforeAfterOrder)
+	r.POST("/:card_id/goodbye", cardbaD.DeleteCardBeforeAfter)
 }

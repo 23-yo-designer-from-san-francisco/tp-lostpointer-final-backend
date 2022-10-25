@@ -279,3 +279,4 @@ func (schR *scheduleRepository) DeleteScheduleLesson(childID, scheduleID int) er
 
 	return nil
 }
+

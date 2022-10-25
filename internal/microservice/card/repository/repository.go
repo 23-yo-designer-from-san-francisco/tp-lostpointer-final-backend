@@ -2,6 +2,7 @@ package repository
 
 import (
 	"autfinal/internal/models"
+	"autfinal/internal/utils/queries"
 	log "autfinal/pkg/logger"
 	"errors"
 	"github.com/jmoiron/sqlx"
@@ -13,12 +14,6 @@ const logMessage = "microservice:card:repository:"
 const (
 	createCardDayQuery = `insert into "card_day" (name, imguuid, startTime, endTime, orderPlace, schedule_id) values ($1, $2, $3, $4, (select cards_count from "schedule_day" where "id" = $5) + 1, $5) 
 		returning id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id;`
-	// createCardWOEndTimeQuery = `insert into "card_day" (name, imguuid, startTime, orderPlace, schedule_id) values ($1, $2, $3, (select COUNT(id) + 1 from "card_day" where schedule_id = $4), $4)
-	// 	returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
-	// createCardWOStartTimeQuery = `insert into "card_day" (name, imguuid, orderPlace, schedule_id) values ($1, $2, (select COUNT(id) + 1 from "card_day" where schedule_id = $3), $3)
-	// 	returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
-	// createCardOnlyImgQuery = `insert into "card_day" (imguuid, orderPlace, schedule_id) values ($1, (select COUNT(id) + 1 from "card_day" where schedule_id = $2), $2)
-	// 	returning id, done, imguuid, orderPlace, schedule_id;`
 
 	getCardsDayQuery = `select id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and deletedAt is null order by orderPlace;`
 	getCardDayQuery  = `select id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id from "card_day" where schedule_id = $1 and id = $2;`
@@ -44,8 +39,6 @@ const (
 		returning id, name, done, imguuid, duration, orderPlace, schedule_id;`
 	safeDeleteCardLesson              = `update "card_lesson" set deletedAt = now() where schedule_id = $1 and id = $2 returning orderPlace;`
 	changeOrderCardsLessonAfterDelete = `update "card_lesson" set orderPlace = (orderPlace - 1) where orderPlace > $1;`
-
-	savePersonalImageQuery = `insert into "personal_image" (imguuid, mentor_id) values ($1, $2);`
 )
 
 type CardRepository struct {
@@ -108,7 +101,7 @@ func (cR *CardRepository) CreateCardDay(CardDay *models.CardDay, mentor_id int) 
 		return nil, err
 	}
 
-	_, err = tx.Exec(savePersonalImageQuery, &CardDay.ImgUUID, &mentor_id)
+	_, err = tx.Exec(queries.SavePersonalImageQuery, &CardDay.ImgUUID, &mentor_id)
 	if err != nil {
 		log.Error(message+"err = ", err)
 		tx.Rollback()
@@ -136,7 +129,7 @@ func (cR *CardRepository) CreateCardLesson(CardLesson *models.CardLesson, mentor
 		return nil, err
 	}
 
-	_, err = tx.Exec(savePersonalImageQuery, &CardLesson.ImgUUID, &mentor_id)
+	_, err = tx.Exec(queries.SavePersonalImageQuery, &CardLesson.ImgUUID, &mentor_id)
 	if err != nil {
 		log.Error(message+"err = ", err)
 		tx.Rollback()
