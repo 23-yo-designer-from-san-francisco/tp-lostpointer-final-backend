@@ -38,6 +38,14 @@ type ScheduleLesson struct {
 	Cards     int    `json:"cards,omitempty" db:"cards_count"`
 }
 
+type ScheduleBeforeAfter struct {
+	ID int `json:"id,omitempty" db:"id"`
+	Child_ID int `json:"child_id,omitempty" db:"child_id"`
+	Name string `json:"name,omitempty" db:"name"`
+	Favourite *bool `json:"favourite,omitempty" db:"favourite"`
+	Cards int `json:"cards,omitempty" db:"cards_count"`
+}
+
 type CardDay struct {
 	ID          int     `json:"id,omitempty" db:"id"`
 	Schedule_ID int     `json:"schedule_id,omitempty" db:"schedule_id"`
@@ -59,6 +67,16 @@ type CardLesson struct {
 	ImgUUID     string  `json:"-" db:"imguuid"`
 	Order       int     `json:"orderPlace,omitempty" db:"orderplace"`
 	Duration    *int    `json:"duration" db:"duration"`
+}
+
+type CardBeforeAfter struct {
+	ID int `json:"id,omitempty" db:"id"`
+	Schedule_ID int `json:"schedule_id,omitempty" db:"schedule_id"`
+	Name *string `json:"name,omitempty" db:"name"`
+	Done *bool `json:"done,omitempty" db:"done"`
+	ImgUrl string `json:"imgUrl,omitempty" db:"-"`
+	ImgUUID string `json:"-" db:"imguuid"`
+	Order int `json:"orderPlace,omitempty" db:"orderplace"`
 }
 
 type PersonalImage struct {
