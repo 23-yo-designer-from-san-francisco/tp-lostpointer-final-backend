@@ -6,6 +6,7 @@ import (
 	log "autfinal/pkg/logger"
 	"errors"
 	"github.com/jmoiron/sqlx"
+	"strings"
 	"time"
 )
 
@@ -120,9 +121,13 @@ func (cR *CardRepository) CreateCardDay(CardDay *models.CardDay, mentor_id int) 
 		var maxOrder int
 		err = tx.QueryRow(getMaxOrderPlaceCardDayQuery, &CardDay.Schedule_ID).Scan(&maxOrder)
 		if err != nil {
-			log.Error(message+"err = ", err)
-			tx.Rollback()
-			return nil, err
+			if strings.Contains(err.Error(), "converting NULL to int is unsupported") {
+				maxOrder = 0
+			} else {
+				log.Error(message+"err = ", err)
+				tx.Rollback()
+				return nil, err
+			}
 		}
 		CardDay.Order = maxOrder + 1
 	} else if CardDay.Order < 1 {
@@ -149,9 +154,13 @@ func (cR *CardRepository) CreateCardDay(CardDay *models.CardDay, mentor_id int) 
 			var maxOrder int
 			err = tx.QueryRow(getMaxOrderPlaceCardDayQuery, &CardDay.Schedule_ID).Scan(&maxOrder)
 			if err != nil {
-				log.Error(message+"err = ", err)
-				tx.Rollback()
-				return nil, err
+				if strings.Contains(err.Error(), "converting NULL to int is unsupported") {
+					maxOrder = 0
+				} else {
+					log.Error(message+"err = ", err)
+					tx.Rollback()
+					return nil, err
+				}
 			}
 			// если пытаемся вставить сильно правее всех, то вставляем через одну после последней карточки
 			if CardDay.Order > (maxOrder + 2) {
@@ -200,9 +209,13 @@ func (cR *CardRepository) CreateCardLesson(CardLesson *models.CardLesson, mentor
 		var maxOrder int
 		err = tx.QueryRow(getMaxOrderPlaceCardLessonQuery, &CardLesson.Schedule_ID).Scan(&maxOrder)
 		if err != nil {
-			log.Error(message+"err = ", err)
-			tx.Rollback()
-			return nil, err
+			if strings.Contains(err.Error(), "converting NULL to int is unsupported") {
+				maxOrder = 0
+			} else {
+				log.Error(message+"err = ", err)
+				tx.Rollback()
+				return nil, err
+			}
 		}
 		CardLesson.Order = maxOrder + 1
 	} else if CardLesson.Order < 1 {
@@ -229,9 +242,13 @@ func (cR *CardRepository) CreateCardLesson(CardLesson *models.CardLesson, mentor
 			var maxOrder int
 			err = tx.QueryRow(getMaxOrderPlaceCardLessonQuery, &CardLesson.Schedule_ID).Scan(&maxOrder)
 			if err != nil {
-				log.Error(message+"err = ", err)
-				tx.Rollback()
-				return nil, err
+				if strings.Contains(err.Error(), "converting NULL to int is unsupported") {
+					maxOrder = 0
+				} else {
+					log.Error(message+"err = ", err)
+					tx.Rollback()
+					return nil, err
+				}
 			}
 			// если пытаемся вставить сильно правее всех, то вставляем через одну после последней карточки
 			if CardLesson.Order > (maxOrder + 2) {
