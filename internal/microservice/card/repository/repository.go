@@ -163,8 +163,8 @@ func (cR *CardRepository) CreateCardDay(CardDay *models.CardDay, mentor_id int) 
 				}
 			}
 			// если пытаемся вставить сильно правее всех, то вставляем через одну после последней карточки
-			if CardDay.Order > (maxOrder + 2) {
-				CardDay.Order = maxOrder + 2
+			if CardDay.Order > (maxOrder + 3) {
+				CardDay.Order = maxOrder + 3
 			}
 		} else {
 			// свигаем Order всех карточек, что правее новой
@@ -251,8 +251,8 @@ func (cR *CardRepository) CreateCardLesson(CardLesson *models.CardLesson, mentor
 				}
 			}
 			// если пытаемся вставить сильно правее всех, то вставляем через одну после последней карточки
-			if CardLesson.Order > (maxOrder + 2) {
-				CardLesson.Order = maxOrder + 2
+			if CardLesson.Order > (maxOrder + 3) {
+				CardLesson.Order = maxOrder + 3
 			}
 		} else {
 			// свигаем Order всех карточек, что правее новой
