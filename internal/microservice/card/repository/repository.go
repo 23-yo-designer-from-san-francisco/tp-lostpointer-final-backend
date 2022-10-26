@@ -14,7 +14,7 @@ const logMessage = "microservice:card:repository:"
 const (
 	createCardDayQuery = `insert into "card_day" (name, imguuid, startTime, endTime, orderPlace, schedule_id) values ($1, $2, $3, $4, $5, $6) 
 		returning id, name, done, imguuid, to_char(starttime, 'HH24:MI') as starttime, to_char(endTime, 'HH24:MI') as endTime, orderPlace, schedule_id;`
-    
+
 	// createCardWOEndTimeQuery = `insert into "card_day" (name, imguuid, startTime, orderPlace, schedule_id) values ($1, $2, $3, (select COUNT(id) + 1 from "card_day" where schedule_id = $4), $4)
 	// 	returning id, name, done, imguuid, startTime, endTime, orderPlace, schedule_id;`
 	// createCardWOStartTimeQuery = `insert into "card_day" (name, imguuid, orderPlace, schedule_id) values ($1, $2, (select COUNT(id) + 1 from "card_day" where schedule_id = $3), $3)
@@ -115,8 +115,18 @@ func (cR *CardRepository) CreateCardDay(CardDay *models.CardDay, mentor_id int) 
 		log.Error(message+"err = ", err)
 		return nil, err
 	}
-	// если пытаемся вставить левее всех, то двигаем все
-	if CardDay.Order < 1 {
+	if CardDay.Order == 0 {
+		// если не указали order (штош, будет такой хардкод)
+		var maxOrder int
+		err = tx.QueryRow(getMaxOrderPlaceCardDayQuery, &CardDay.Schedule_ID).Scan(&maxOrder)
+		if err != nil {
+			log.Error(message+"err = ", err)
+			tx.Rollback()
+			return nil, err
+		}
+		CardDay.Order = maxOrder + 1
+	} else if CardDay.Order < 1 {
+		// если пытаемся вставить левее всех, то двигаем все
 		CardDay.Order = 1
 		_, err = tx.Exec(incrementOrderPlaceCardDayQuery, &CardDay.Schedule_ID, 1)
 		if err != nil {
@@ -185,9 +195,18 @@ func (cR *CardRepository) CreateCardLesson(CardLesson *models.CardLesson, mentor
 		log.Error(message+"err = ", err)
 		return nil, err
 	}
-
-	// если пытаемся вставить левее всех, то двигаем все
-	if CardLesson.Order < 1 {
+	if CardLesson.Order == 0 {
+		// если не указали order (штош, будет такой хардкод)
+		var maxOrder int
+		err = tx.QueryRow(getMaxOrderPlaceCardLessonQuery, &CardLesson.Schedule_ID).Scan(&maxOrder)
+		if err != nil {
+			log.Error(message+"err = ", err)
+			tx.Rollback()
+			return nil, err
+		}
+		CardLesson.Order = maxOrder + 1
+	} else if CardLesson.Order < 1 {
+		// если пытаемся вставить левее всех, то двигаем все
 		CardLesson.Order = 1
 		_, err = tx.Exec(incrementOrderPlaceCardLessonQuery, &CardLesson.Schedule_ID, 1)
 		if err != nil {
